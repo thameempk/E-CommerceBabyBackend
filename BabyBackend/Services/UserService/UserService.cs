@@ -25,11 +25,12 @@ namespace BabyBackend.Services.UserService
         public void  RegisterUser(UserRegisterDto userRegister)
         {
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
-            string hashPassword = BCrypt.Net.BCrypt.HashPassword(salt, userRegister.Password);
+            string hashPassword = BCrypt.Net.BCrypt.HashPassword( userRegister.Password, salt);
             userRegister.Password = hashPassword;
 
             var user = _mapper.Map<Users>(userRegister);
             _dbContext.Users.Add(user);
+            _dbContext.SaveChanges();
         }
         public List<Users> GetUsers()
         {
@@ -39,7 +40,7 @@ namespace BabyBackend.Services.UserService
         public Users Login(LoginDto login)
         {
 
-            var existinguser = _dbContext.Users.FirstOrDefault(u => u.Email ==  login.Email && u.Password == login.Password);
+            var existinguser = _dbContext.Users.FirstOrDefault(u => u.Email ==  login.Email);
             return existinguser;
 
         }
