@@ -9,6 +9,8 @@ namespace BabyBackend.Mapper
         public BabyMapper()
         {
             CreateMap<Users, UserRegisterDto>().ReverseMap();
+            CreateMap<Product, ProductDto>().ReverseMap();
+            CreateMap<Category, CategoryDto>().ReverseMap();
         }
     }
 }

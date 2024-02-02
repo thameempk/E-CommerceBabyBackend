@@ -7,7 +7,11 @@ namespace BabyBackend.Services.ProductService
     {
         List<Product> GetProducts();
         Product GetProductById(int id);
-        void AddProduct(ProductDto productDto) ;
+        void AddProduct(ProductDto productDto);
+        void UpdateProduct(int id ,ProductDto productDto);
+        void DeleteProduct(int id);
+
+
 
     }
 }

@@ -1,5 +1,8 @@
 using BabyBackend.DbContexts;
 using BabyBackend.Mapper;
+using BabyBackend.Services.CartService;
+using BabyBackend.Services.CategoryService;
+using BabyBackend.Services.ProductService;
 using BabyBackend.Services.UserService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
@@ -16,6 +19,9 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<BabyDbContext>();
 builder.Services.AddAutoMapper(typeof(BabyMapper));
 builder.Services.AddScoped<IUserServices, UserService>();
+builder.Services.AddScoped<IProductServices, ProductServices>();
+builder.Services.AddScoped<ICategoryServices, CategoryServices>();
+builder.Services.AddScoped<ICartServices, CartServices>();
 
 builder.Services.AddAuthentication(options =>
 {

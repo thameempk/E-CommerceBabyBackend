@@ -8,8 +8,6 @@
         public string Password { get; set; }
 
         public string Role { get; set; }
-
-        public int CartId { get; set; }
         public virtual Cart cart { get; set; }
         
     }
