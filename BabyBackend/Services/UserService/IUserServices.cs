@@ -6,7 +6,8 @@ namespace BabyBackend.Services.UserService
     public interface IUserServices
     {
         void RegisterUser(UserRegisterDto userRegister);
-        List<Users> GetUsers();
+        List<UserViewDto> GetUsers();
+        UserViewDto GetUserById(int id);
         Users Login(LoginDto login);
 
 

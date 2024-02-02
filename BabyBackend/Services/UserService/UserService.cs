@@ -22,6 +22,19 @@ namespace BabyBackend.Services.UserService
             _configuration = configuration;
         }
 
+        public List<UserViewDto> GetUsers()
+        {
+            var user = _dbContext.Users.ToList();
+            var userMap = _mapper.Map<List<UserViewDto>>(user);
+            return userMap;
+        }
+        public UserViewDto GetUserById(int id)
+        {
+            var user = _dbContext.Users.FirstOrDefault(u => u.Id == id);
+            var mapUser = _mapper.Map<UserViewDto>(user);
+            return mapUser;
+        }
+
         public void  RegisterUser(UserRegisterDto userRegister)
         {
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
@@ -31,10 +44,6 @@ namespace BabyBackend.Services.UserService
             var user = _mapper.Map<Users>(userRegister);
             _dbContext.Users.Add(user);
             _dbContext.SaveChanges();
-        }
-        public List<Users> GetUsers()
-        {
-            return _dbContext.Users.ToList();
         }
 
         public Users Login(LoginDto login)

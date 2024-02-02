@@ -9,6 +9,8 @@ using System.Text;
 
 namespace BabyBackend.Controllers
 {
+    [Route("api/[controller]")]
+    [ApiController]
     public class UserController : ControllerBase
     {
 
@@ -19,6 +21,21 @@ namespace BabyBackend.Controllers
         {
             _configuration = configuration;
             _userServices = userServices;
+        }
+
+        [HttpGet]
+
+        public ActionResult GetUsers()
+        {
+            return Ok(_userServices.GetUsers());
+        }
+
+
+        [HttpGet("{id}")]
+
+        public ActionResult GetUserById(int id)
+        {
+            return Ok(_userServices.GetUserById(id));
         }
 
         [HttpPost("register")]

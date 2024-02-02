@@ -15,6 +15,13 @@ namespace BabyBackend.Controllers
             _cartServices = cartServices;
         }
 
+        [HttpGet("{userId}")]
+
+        public ActionResult GetCartItems(int userId)
+        {
+            return Ok(_cartServices.GetCartItems(userId));
+        }
+
         [HttpPost("add-to-cart")]
         public ActionResult AddToCart(int userId, int productId )
         {
@@ -22,11 +29,22 @@ namespace BabyBackend.Controllers
             return Ok();
         }
 
-        [HttpPut]
+        [HttpPut("add-quantity")]
         public IActionResult QuantityAdd(int userId, int productId)
         {
             _cartServices.QuantityPlus(userId, productId);
             return Ok();
         }
+
+        [HttpPut("min-quantity")]
+
+        public IActionResult QuantityMin(int userId, int productId)
+        {
+            _cartServices.QuantityMin(userId, productId);
+            return Ok();
+        }
+
+
+
     }
 }

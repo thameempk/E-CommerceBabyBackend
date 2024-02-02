@@ -1,5 +1,6 @@
 ﻿using BabyBackend.DbContexts;
 using BabyBackend.Models;
+using BabyBackend.Models.Dto;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Validations;
 
@@ -12,6 +13,23 @@ namespace BabyBackend.Services.CartService
         public CartServices(BabyDbContext dbContext)
         {
             _dbContext = dbContext;
+        }
+
+        public List<CartViewDto> GetCartItems(int userId)
+        {
+            var user = _dbContext.Users.Include(u => u.cart).ThenInclude(c => c.cartItems).ThenInclude(ci => ci.product).FirstOrDefault(u => u.Id == userId);
+            if(user != null)
+            {
+                var cartItems = user.cart.cartItems.Select(ci => new CartViewDto
+                {
+                    Id = ci.CartId,
+                    ProductName = ci.product.ProductName,
+                    Quantity = ci.Quantity
+                }).ToList();
+
+                return cartItems;
+            }
+            return new List<CartViewDto> ();
         }
 
         public void AddToCart(int userId, int productId)

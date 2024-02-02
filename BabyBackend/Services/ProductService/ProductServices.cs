@@ -2,6 +2,7 @@
 using BabyBackend.DbContexts;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 
 namespace BabyBackend.Services.ProductService
 {
@@ -15,9 +16,18 @@ namespace BabyBackend.Services.ProductService
             _mapper = mapper;
         }
 
-        public List<Product> GetProducts()
+        public List<ProductViewDto> GetProducts()
         {
-            return _dbContext.products.ToList();
+            var products = _dbContext.products.Include(p => p.Category).ToList();
+            var productWithCategory = products.Select(p => new ProductViewDto
+            {
+                Id = p.Id,
+                ProductName = p.ProductName,
+                ProductDescription = p.ProductDescription,
+                Price = p.Price,
+                Category = p.Category.Name
+            }).ToList();
+            return productWithCategory;
         }
 
         public Product GetProductById(int id)
