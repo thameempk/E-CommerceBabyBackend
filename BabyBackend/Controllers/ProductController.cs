@@ -32,6 +32,14 @@ namespace BabyBackend.Controllers
             return Ok(_productServices.GetProductById(id));
         }
 
+
+        [HttpGet("product-by-category")]
+
+        public ActionResult GetProductByCategory(int categoryId)
+        {
+            return Ok(_productServices.GetProductByCategory(categoryId));
+        }
+
         [HttpPost]
 
         public IActionResult AddProduct([FromBody] ProductDto productDto)
@@ -55,5 +63,7 @@ namespace BabyBackend.Controllers
             _productServices.UpdateProduct(id, productDto);
             return Ok();
         }
+
+
     }
 }

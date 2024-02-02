@@ -6,7 +6,8 @@ namespace BabyBackend.Services.ProductService
     public interface IProductServices
     {
         List<ProductViewDto> GetProducts();
-        Product GetProductById(int id);
+        ProductViewDto GetProductById(int id);
+        List<ProductViewDto> GetProductByCategory(int  categoryId);
         void AddProduct(ProductDto productDto);
         void UpdateProduct(int id ,ProductDto productDto);
         void DeleteProduct(int id);

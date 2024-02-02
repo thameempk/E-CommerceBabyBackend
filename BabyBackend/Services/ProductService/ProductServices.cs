@@ -30,9 +30,37 @@ namespace BabyBackend.Services.ProductService
             return productWithCategory;
         }
 
-        public Product GetProductById(int id)
+        public ProductViewDto GetProductById(int id)
         {
-            return _dbContext.products.FirstOrDefault(p => p.Id == id);
+            var products = _dbContext.products.Include(p => p.Category).FirstOrDefault(p => p.Id == id);
+            ProductViewDto product = new ProductViewDto
+            {
+                Id = products.Id,
+                ProductName = products.ProductName,
+                ProductDescription = products.ProductDescription,
+                Price = products.Price,
+                Category = products.Category.Name
+
+            };
+            return product;
+
+        }
+
+        public List<ProductViewDto> GetProductByCategory(int categoryId)
+        {
+            var products = _dbContext.products.Include(p => p.Category).Where(p => p.CategoryId == categoryId).Select(p => new ProductViewDto
+            {
+                Id = p.Id,
+                ProductName = p.ProductName,
+                ProductDescription = p.ProductDescription,
+                Price = p.Price,
+                Category = p.Category.Name
+            }).ToList();
+            
+           
+            return products;
+
+
 
         }
 
