@@ -16,14 +16,18 @@ namespace BabyBackend.Services.CategoryService
             _mapper = mapper;
         }
 
-        public List<Category>  GetCategories()
+        public List<CategoryViewDto>  GetCategories()
         {
-            return _dbContext.categories.ToList();
+            var cat = _dbContext.categories.ToList();
+            var categories = _mapper.Map<List<CategoryViewDto>>(cat);
+            return categories;
           
         }
-        public Category GetCategoryById(int id)
+        public CategoryViewDto GetCategoryById(int id)
         {
-            return _dbContext.categories.FirstOrDefault(c => c.Id == id);
+            var cat = _dbContext.categories.FirstOrDefault(c => c.Id == id);
+            var category = _mapper.Map<CategoryViewDto>(cat);
+            return category;
         }
 
         public void AddCategory(CategoryDto categoryDto)

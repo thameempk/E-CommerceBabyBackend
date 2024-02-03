@@ -24,6 +24,8 @@ namespace BabyBackend.DbContexts
 
         public DbSet<Category> categories { get; set; }
 
+        public DbSet<WhishList> whishList { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
@@ -58,6 +60,16 @@ namespace BabyBackend.DbContexts
                 .HasMany(c => c.Products)
                 .WithOne(p => p.Category)
                 .HasForeignKey(p => p.CategoryId);
+
+            modelBuilder.Entity<WhishList>()
+                .HasOne(w => w.users)
+                .WithMany(u => u.whishLists)
+                .HasForeignKey(u => u.UserId);
+
+            modelBuilder.Entity<WhishList>()
+                .HasOne(w => w.products)
+                .WithMany()
+                .HasForeignKey(p => p.ProductId);
 
             base.OnModelCreating(modelBuilder);
         }

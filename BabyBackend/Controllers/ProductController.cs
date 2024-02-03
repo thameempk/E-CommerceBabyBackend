@@ -1,7 +1,10 @@
-﻿using BabyBackend.Models.Dto;
+﻿using Azure;
+using BabyBackend.Models;
+using BabyBackend.Models.Dto;
 using BabyBackend.Services.ProductService;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using static System.Net.WebRequestMethods;
 
 namespace BabyBackend.Controllers
 {
@@ -10,10 +13,12 @@ namespace BabyBackend.Controllers
     public class ProductController : ControllerBase
     {
         private readonly IProductServices _productServices;
+        private readonly IWebHostEnvironment _webHostEnvironment;
 
-        public ProductController(IProductServices productServices)
+        public ProductController(IProductServices productServices, IWebHostEnvironment webHostEnvironment)
         {
             _productServices = productServices;
+            _webHostEnvironment = webHostEnvironment;
         }
 
 
@@ -21,7 +26,15 @@ namespace BabyBackend.Controllers
 
         public ActionResult GetProducts()
         {
-           return Ok(_productServices.GetProducts());
+            var products = _productServices.GetProducts();
+            if(products != null && products.Count > 0)
+            {
+                foreach (var p in products)
+                {
+                    p.ProductImage = GetImageById(p.Id);
+                }
+            }
+           return Ok(products);
 
         }
 
@@ -29,7 +42,12 @@ namespace BabyBackend.Controllers
 
         public ActionResult GetProdectById(int id)
         {
-            return Ok(_productServices.GetProductById(id));
+            var products = _productServices.GetProductById(id);
+            if (products != null)
+            {
+                products.ProductImage = GetImageById(products.Id);
+            }
+            return Ok(products);
         }
 
 
@@ -63,6 +81,77 @@ namespace BabyBackend.Controllers
             _productServices.UpdateProduct(id, productDto);
             return Ok();
         }
+
+        [HttpPost("UploadImage")]
+
+        public async Task<ActionResult> UploadImage()
+        {
+            var files = Request.Form.Files;
+            foreach(IFormFile file in files)
+            {
+                string FileName = file.FileName;
+                string FilePath = GetFilePath(FileName);
+
+                if(!System.IO.Directory.Exists(FilePath))
+                {
+                    System.IO.Directory.CreateDirectory(FilePath);
+                }
+
+                string ImagePath = FilePath + "\\image.png";
+                if(System.IO.File.Exists(ImagePath))
+                {
+                    System.IO.File.Delete(ImagePath);
+                }
+
+                using(FileStream stream = System.IO.File.Create(ImagePath))
+                {
+                    await stream.CopyToAsync(stream);
+                }
+
+            }
+            return Ok();
+        }
+
+        [HttpGet("Remove-Image")]
+
+        public ActionResult RemoveImage (int productId)
+        {
+            string filePath = GetFilePath(productId.ToString());
+            string ImagePath = filePath + "\\image.png";
+
+            if (System.IO.File.Exists(ImagePath))
+            {
+                System.IO.File.Delete(filePath);
+            }
+            return Ok();
+        }
+
+        [NonAction]
+        private string GetFilePath(string productId)
+        {
+            return _webHostEnvironment.WebRootPath + "\\Uploads\\Product\\" + productId;
+        }
+
+        [NonAction]
+
+        private string GetImageById(int productId)
+        {
+            string ImageUrl = string.Empty;
+            string HostUrl = "http://localhost:5237/";
+            string filePath = GetFilePath(productId.ToString());
+            string ImagePath = filePath + "\\image.png";
+
+            if(!System.IO.File.Exists(ImagePath))
+            {
+                ImageUrl = HostUrl + "Uploads/common/noimage.png";
+            }
+            else
+            {
+                ImageUrl = HostUrl + "Uploads/Product/" + productId + "/image.png";
+            }
+            return ImageUrl;
+        }
+
 
 
     }

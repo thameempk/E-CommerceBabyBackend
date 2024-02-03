@@ -25,7 +25,8 @@ namespace BabyBackend.Services.ProductService
                 ProductName = p.ProductName,
                 ProductDescription = p.ProductDescription,
                 Price = p.Price,
-                Category = p.Category.Name
+                Category = p.Category.Name,
+                ProductImage = p.ProductImage
             }).ToList();
             return productWithCategory;
         }
@@ -39,7 +40,8 @@ namespace BabyBackend.Services.ProductService
                 ProductName = products.ProductName,
                 ProductDescription = products.ProductDescription,
                 Price = products.Price,
-                Category = products.Category.Name
+                Category = products.Category.Name,
+                ProductImage = products.ProductImage
 
             };
             return product;
@@ -84,5 +86,7 @@ namespace BabyBackend.Services.ProductService
             _dbContext.Remove(prd);
             _dbContext.SaveChanges();
         }
+
+        
     }
 }

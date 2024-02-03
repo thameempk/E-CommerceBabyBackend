@@ -5,8 +5,8 @@ namespace BabyBackend.Services.CategoryService
 {
     public interface ICategoryServices
     {
-        List<Category> GetCategories();
-        Category GetCategoryById(int id);
+        List<CategoryViewDto> GetCategories();
+        CategoryViewDto GetCategoryById(int id);
 
         void AddCategory(CategoryDto categoryDto);
         void DeleteCategory(int id);
