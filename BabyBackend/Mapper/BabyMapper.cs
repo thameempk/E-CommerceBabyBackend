@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using BabyBackend.Migrations;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 
@@ -13,6 +14,7 @@ namespace BabyBackend.Mapper
             CreateMap<Category, CategoryDto>().ReverseMap();
             CreateMap< UserViewDto ,Users> ().ReverseMap();
             CreateMap<CategoryViewDto, Category>().ReverseMap();
+            CreateMap<WhishList, WhishListDto>().ReverseMap();
         }
     }
 }

@@ -4,6 +4,7 @@ using BabyBackend.Services.CartService;
 using BabyBackend.Services.CategoryService;
 using BabyBackend.Services.ProductService;
 using BabyBackend.Services.UserService;
+using BabyBackend.Services.WhishListService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -22,6 +23,7 @@ builder.Services.AddScoped<IUserServices, UserService>();
 builder.Services.AddScoped<IProductServices, ProductServices>();
 builder.Services.AddScoped<ICategoryServices, CategoryServices>();
 builder.Services.AddScoped<ICartServices, CartServices>();
+builder.Services.AddScoped<IWhishListServices, WhishListServices>();
 
 builder.Services.AddAuthentication(options =>
 {

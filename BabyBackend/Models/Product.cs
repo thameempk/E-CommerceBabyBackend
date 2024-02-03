@@ -14,5 +14,6 @@
         public virtual Category Category { get; set; }
 
         public virtual List<CartItem> CartItems { get; set; }
+
     }
 }

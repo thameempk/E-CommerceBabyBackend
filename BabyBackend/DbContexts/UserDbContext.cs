@@ -24,7 +24,7 @@ namespace BabyBackend.DbContexts
 
         public DbSet<Category> categories { get; set; }
 
-        public DbSet<WhishList> whishList { get; set; }
+        public DbSet<WhishList> whishLists { get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
