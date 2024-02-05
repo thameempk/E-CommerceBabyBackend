@@ -22,14 +22,14 @@ namespace BabyBackend.Services.CartService
             {
                 var cartItems = user.cart.cartItems.Select(ci => new CartViewDto
                 {
-                    Id = ci.CartId,
+                    ProductId = ci.ProductId,
                     ProductName = ci.product.ProductName,
                     Quantity = ci.Quantity
                 }).ToList();
 
                 return cartItems;
             }
-            return new List<CartViewDto> ();
+            return new List<CartViewDto>();
         }
 
         public void AddToCart(int userId, int productId)

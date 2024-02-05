@@ -10,6 +10,7 @@
         public string Role { get; set; }
         public virtual Cart cart { get; set; }
 
+        public virtual List<OrderMain> Orders { get; set; }
         public virtual List<WhishList> whishLists { get; set; }
         
     }

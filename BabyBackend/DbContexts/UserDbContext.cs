@@ -1,5 +1,6 @@
 ﻿using BabyBackend.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Concurrent;
 
 namespace BabyBackend.DbContexts
 {
@@ -25,6 +26,10 @@ namespace BabyBackend.DbContexts
         public DbSet<Category> categories { get; set; }
 
         public DbSet<WhishList> whishLists { get; set; }
+
+        public DbSet<OrderMain> orders { get; set; }
+
+        public DbSet<OrderItem> orderItems {  get; set; }
 
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -70,6 +75,21 @@ namespace BabyBackend.DbContexts
                 .HasOne(w => w.products)
                 .WithMany()
                 .HasForeignKey(p => p.ProductId);
+
+            modelBuilder.Entity<OrderMain>()
+                .HasOne(o => o.users)
+                .WithMany(u => u.Orders)
+                .HasForeignKey(u => u.userId);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Order)
+                .WithMany(o => o.OrderItems)
+                .HasForeignKey(o => o.OrderId);
+
+            modelBuilder.Entity<OrderItem>()
+                .HasOne(oi => oi.Product)
+                .WithMany()
+                .HasForeignKey(oi => oi.ProductId);
 
             base.OnModelCreating(modelBuilder);
         }

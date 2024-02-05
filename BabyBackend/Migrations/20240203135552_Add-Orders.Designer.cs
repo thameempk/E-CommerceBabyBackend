@@ -4,6 +4,7 @@ using BabyBackend.DbContexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace BabyBackend.Migrations
 {
     [DbContext(typeof(BabyDbContext))]
-    partial class BabyDbContextModelSnapshot : ModelSnapshot
+    [Migration("20240203135552_Add-Orders")]
+    partial class AddOrders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -84,6 +87,27 @@ namespace BabyBackend.Migrations
                     b.ToTable("categories");
                 });
 
+            modelBuilder.Entity("BabyBackend.Models.Order", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("OrderDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("userId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("userId");
+
+                    b.ToTable("orders");
+                });
+
             modelBuilder.Entity("BabyBackend.Models.OrderItem", b =>
                 {
                     b.Property<int>("Id")
@@ -108,27 +132,6 @@ namespace BabyBackend.Migrations
                     b.HasIndex("ProductId");
 
                     b.ToTable("orderItems");
-                });
-
-            modelBuilder.Entity("BabyBackend.Models.OrderMain", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<DateTime>("OrderDate")
-                        .HasColumnType("datetime2");
-
-                    b.Property<int>("userId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("userId");
-
-                    b.ToTable("orders");
                 });
 
             modelBuilder.Entity("BabyBackend.Models.Product", b =>
@@ -248,9 +251,20 @@ namespace BabyBackend.Migrations
                     b.Navigation("product");
                 });
 
+            modelBuilder.Entity("BabyBackend.Models.Order", b =>
+                {
+                    b.HasOne("BabyBackend.Models.Users", "users")
+                        .WithMany("Orders")
+                        .HasForeignKey("userId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("users");
+                });
+
             modelBuilder.Entity("BabyBackend.Models.OrderItem", b =>
                 {
-                    b.HasOne("BabyBackend.Models.OrderMain", "Order")
+                    b.HasOne("BabyBackend.Models.Order", "Order")
                         .WithMany("OrderItems")
                         .HasForeignKey("OrderId")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -265,17 +279,6 @@ namespace BabyBackend.Migrations
                     b.Navigation("Order");
 
                     b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("BabyBackend.Models.OrderMain", b =>
-                {
-                    b.HasOne("BabyBackend.Models.Users", "users")
-                        .WithMany("Orders")
-                        .HasForeignKey("userId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("users");
                 });
 
             modelBuilder.Entity("BabyBackend.Models.Product", b =>
@@ -318,7 +321,7 @@ namespace BabyBackend.Migrations
                     b.Navigation("Products");
                 });
 
-            modelBuilder.Entity("BabyBackend.Models.OrderMain", b =>
+            modelBuilder.Entity("BabyBackend.Models.Order", b =>
                 {
                     b.Navigation("OrderItems");
                 });

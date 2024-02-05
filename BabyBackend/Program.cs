@@ -2,6 +2,7 @@ using BabyBackend.DbContexts;
 using BabyBackend.Mapper;
 using BabyBackend.Services.CartService;
 using BabyBackend.Services.CategoryService;
+using BabyBackend.Services.OrderService;
 using BabyBackend.Services.ProductService;
 using BabyBackend.Services.UserService;
 using BabyBackend.Services.WhishListService;
@@ -24,6 +25,7 @@ builder.Services.AddScoped<IProductServices, ProductServices>();
 builder.Services.AddScoped<ICategoryServices, CategoryServices>();
 builder.Services.AddScoped<ICartServices, CartServices>();
 builder.Services.AddScoped<IWhishListServices, WhishListServices>();
+builder.Services.AddScoped<IOrderServices, OrderServices>();
 
 builder.Services.AddAuthentication(options =>
 {
