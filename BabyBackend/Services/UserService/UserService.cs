@@ -35,15 +35,26 @@ namespace BabyBackend.Services.UserService
             return mapUser;
         }
 
-        public void  RegisterUser(UserRegisterDto userRegister)
+        public bool  RegisterUser(UserRegisterDto userRegister)
         {
+            var isUserExist = _dbContext.Users.FirstOrDefault(u => u.Email ==  userRegister.Email);
+            
+            if(isUserExist != null)
+            {
+                
+                return false;
+            }
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
-            string hashPassword = BCrypt.Net.BCrypt.HashPassword( userRegister.Password, salt);
+            string hashPassword = BCrypt.Net.BCrypt.HashPassword(userRegister.Password, salt);
             userRegister.Password = hashPassword;
 
             var user = _mapper.Map<Users>(userRegister);
             _dbContext.Users.Add(user);
             _dbContext.SaveChanges();
+
+            return true;
+
+
         }
 
         public Users Login(LoginDto login)

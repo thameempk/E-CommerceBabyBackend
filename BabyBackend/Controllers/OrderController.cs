@@ -16,13 +16,25 @@ namespace BabyBackend.Controllers
             _orderServices = orderServices;
         }
 
-        [HttpPost("create-order")]
 
-        public ActionResult CreateOrder([FromBody] OrderDetailsDto orderDetails)
+        [HttpPost("order-create")]
+
+        public ActionResult createOrder(long price)
         {
-            string OrderId = _orderServices.OrderCreate(orderDetails);
-            return Ok(OrderId);
+            var orderId =_orderServices.OrderCreate(price);
+            return Ok(orderId);
+
         }
+
+
+        [HttpPost("payment")]
+
+        public ActionResult Payment(RazorpayDto razorpay)
+        {
+            var con = _orderServices.Payment(razorpay);
+            return Ok(con);
+        }
+
 
         [HttpPost("place-Order")]
 
@@ -30,6 +42,23 @@ namespace BabyBackend.Controllers
         {
             _orderServices.CreateOrder(userId, cartViews);
             return Ok();
+        }
+
+
+
+        [HttpGet("get_order_details")]
+
+        public ActionResult GetOrderDetails (int userId)
+        {
+            
+            return Ok(_orderServices.GetOrderDtails(userId));
+        }
+
+        [HttpGet("total_revenue")]
+
+        public ActionResult GetTotalRevenue()
+        {
+            return Ok(_orderServices.GetTotalRevenue());
         }
     }
 }

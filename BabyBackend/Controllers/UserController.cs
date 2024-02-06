@@ -42,8 +42,19 @@ namespace BabyBackend.Controllers
 
         public ActionResult RegisterUser([FromBody] UserRegisterDto userRegister)
         {
-            _userServices.RegisterUser(userRegister);
-            return Ok("succss");
+            try
+            {
+                var isExist = _userServices.RegisterUser(userRegister);
+                if (!isExist)
+                {
+                    return BadRequest("user already exist");
+                }
+                return Ok("succss");
+            }catch (Exception ex)
+            {
+                return StatusCode(500, $"an error occured, {ex.Message}");
+            }
+            
         }
 
         [HttpPost("login")]

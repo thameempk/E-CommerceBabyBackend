@@ -24,7 +24,10 @@ namespace BabyBackend.Services.CartService
                 {
                     ProductId = ci.ProductId,
                     ProductName = ci.product.ProductName,
-                    Quantity = ci.Quantity
+                    Quantity = ci.Quantity,
+                    Price = ci.product.Price,
+                    TotalAmount = ci.product.Price * ci.Quantity
+                    
                 }).ToList();
 
                 return cartItems;
@@ -43,9 +46,12 @@ namespace BabyBackend.Services.CartService
                 {
                     user.cart = new Cart
                     {
-                        UserId = userId
+                        UserId = userId,
+                        cartItems = new List<CartItem>()
+                        
                     };
-                    
+                    _dbContext.cart.Add(user.cart);
+                    _dbContext.SaveChanges();
                 }
           
             

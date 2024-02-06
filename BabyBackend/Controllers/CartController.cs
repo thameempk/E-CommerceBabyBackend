@@ -44,6 +44,14 @@ namespace BabyBackend.Controllers
             return Ok();
         }
 
+        [HttpDelete("remove-cart-item")]
+
+        public ActionResult RemoveCartItem(int userId, int productId)
+        {
+            _cartServices.DeleteCart( userId,  productId);
+            return Ok(true);
+        }
+
 
 
     }
