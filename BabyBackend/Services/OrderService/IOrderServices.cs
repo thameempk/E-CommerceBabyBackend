@@ -5,14 +5,22 @@ namespace BabyBackend.Services.OrderService
 {
     public interface IOrderServices
     {
-        string OrderCreate(long price);
-        List<OrderDetailsDto> Payment(RazorpayDto razorpay);
+        Task<string> OrderCreate(long price);
+        public List<OrderDetailsDto> Payment(RazorpayDto razorpay);
 
-        void CreateOrder(int userId, List<CartViewDto> cartViews);
+        Task<bool> CreateOrder(int userId, OrderRequestDto orderRequests);
 
-        List<OrderViewDto> GetOrderDtails(int userId);
+        Task<List<OrderViewDto>> GetOrderDtails(int userId);
 
-        decimal GetTotalRevenue();
+        Task<decimal> GetTotalRevenue();
+
+        Task<List<OrderAdminViewDto>> GetOrderDetailAdmin();
+
+        Task<OrderAdminDetailViewDto> GetOrderDetailsById(int orderId);
+
+        Task<bool> UpdateOrder(int orderId, OrderAdminViewDto orderAdminView);
+
+
         
         
 

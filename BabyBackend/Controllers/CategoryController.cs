@@ -18,39 +18,39 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet]
-        public ActionResult GetCategories()
+        public async Task<ActionResult> GetCategories()
         {
-            return Ok(_categoryServices.GetCategories());
+            return Ok(await _categoryServices.GetCategories());
         }
 
         [HttpGet("{id}")]
 
-        public ActionResult GetCategoryById(int id)
+        public async Task<ActionResult> GetCategoryById(int id)
         {
-            return Ok(_categoryServices.GetCategoryById(id));
+            return Ok(await _categoryServices.GetCategoryById(id));
         }
 
         [HttpPost]
 
-        public IActionResult AddCategory([FromBody] CategoryDto categoryDto)
+        public async Task<IActionResult> AddCategory([FromBody] CategoryDto categoryDto)
         {
-            _categoryServices.AddCategory(categoryDto);
+            await _categoryServices.AddCategory(categoryDto);
             return Ok();
         }
 
         [HttpPut("{id}")]
 
-        public IActionResult UpdateCategory(int id , [FromBody] CategoryDto categoryDto)
+        public async Task<IActionResult> UpdateCategory(int id , [FromBody] CategoryDto categoryDto)
         {
-            _categoryServices.UpdateCategory(id, categoryDto);
+            await _categoryServices.UpdateCategory(id, categoryDto);
             return Ok();
         }
 
         [HttpDelete("{id}")]
 
-        public IActionResult DeleteCategory(int id)
+        public async Task<IActionResult> DeleteCategory(int id)
         {
-            _categoryServices.DeleteCategory(id);
+            await _categoryServices.DeleteCategory(id);
             return Ok();
         }
     }

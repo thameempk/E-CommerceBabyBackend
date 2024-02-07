@@ -2,10 +2,14 @@
 using BabyBackend.DbContexts;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.Linq;
 using System.Security.Claims;
 using System.Text;
+using System.Threading.Tasks; 
 
 namespace BabyBackend.Services.UserService
 {
@@ -22,50 +26,43 @@ namespace BabyBackend.Services.UserService
             _configuration = configuration;
         }
 
-        public List<UserViewDto> GetUsers()
+        public async Task<List<UserViewDto>> GetUsers()
         {
-            var user = _dbContext.Users.ToList();
-            var userMap = _mapper.Map<List<UserViewDto>>(user);
+            var users = await _dbContext.Users.ToListAsync();
+            var userMap = _mapper.Map<List<UserViewDto>>(users);
             return userMap;
         }
-        public UserViewDto GetUserById(int id)
+
+        public async Task<UserViewDto> GetUserById(int id)
         {
-            var user = _dbContext.Users.FirstOrDefault(u => u.Id == id);
+            var user = await _dbContext.Users.FirstOrDefaultAsync(u => u.Id == id);
             var mapUser = _mapper.Map<UserViewDto>(user);
             return mapUser;
         }
 
-        public bool  RegisterUser(UserRegisterDto userRegister)
+        public async Task<bool> RegisterUser(UserRegisterDto userRegister)
         {
-            var isUserExist = _dbContext.Users.FirstOrDefault(u => u.Email ==  userRegister.Email);
-            
-            if(isUserExist != null)
+            var isUserExist = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == userRegister.Email);
+            if (isUserExist != null)
             {
-                
                 return false;
             }
+
             string salt = BCrypt.Net.BCrypt.GenerateSalt();
             string hashPassword = BCrypt.Net.BCrypt.HashPassword(userRegister.Password, salt);
             userRegister.Password = hashPassword;
 
             var user = _mapper.Map<Users>(userRegister);
             _dbContext.Users.Add(user);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
 
             return true;
-
-
         }
 
-        public Users Login(LoginDto login)
+        public async Task<Users> Login(LoginDto login)
         {
-
-            var existinguser = _dbContext.Users.FirstOrDefault(u => u.Email ==  login.Email);
-            return existinguser;
-
+            var existingUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == login.Email);
+            return existingUser;
         }
-
-        
-
     }
 }

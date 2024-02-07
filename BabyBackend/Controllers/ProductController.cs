@@ -24,9 +24,9 @@ namespace BabyBackend.Controllers
 
         [HttpGet]
 
-        public ActionResult GetProducts()
+        public async Task<ActionResult> GetProducts()
         {
-            var products = _productServices.GetProducts();
+            var products = await _productServices.GetProducts();
             if(products != null && products.Count > 0)
             {
                 foreach (var p in products)
@@ -38,11 +38,23 @@ namespace BabyBackend.Controllers
 
         }
 
+
+
+
+        [HttpGet("paginated-product")]
+
+        public async Task<ActionResult> PaginatedProduct([FromQuery] int pageNumber = 1 , [FromQuery] int PageSize = 10)
+        {
+            
+            return Ok(await _productServices.ProductPagination(pageNumber, PageSize));
+        }
+
+
         [HttpGet("{id}", Name ="getproducts")]
 
-        public ActionResult GetProdectById(int id)
+        public async Task<ActionResult> GetProdectById(int id)
         {
-            var products = _productServices.GetProductById(id);
+            var products = await _productServices.GetProductById(id);
             if (products != null)
             {
                 products.ProductImage = GetImageById(products.Id);
@@ -53,32 +65,32 @@ namespace BabyBackend.Controllers
 
         [HttpGet("product-by-category")]
 
-        public ActionResult GetProductByCategory(int categoryId)
+        public async Task<ActionResult> GetProductByCategory(int categoryId)
         {
-            return Ok(_productServices.GetProductByCategory(categoryId));
+            return Ok(await _productServices.GetProductByCategory(categoryId));
         }
 
         [HttpPost]
 
-        public IActionResult AddProduct([FromBody] ProductDto productDto)
+        public async Task<IActionResult> AddProduct([FromBody] ProductDto productDto )
         {
-            _productServices.AddProduct(productDto);
+            await _productServices.AddProduct(productDto);
             return Ok();
         }
 
         [HttpDelete("{id}")]
 
-        public IActionResult DeleteProduct(int id)
+        public async Task<IActionResult> DeleteProduct(int id)
         {
-            _productServices.DeleteProduct(id);
+            await _productServices.DeleteProduct(id);
             return Ok();
         }
 
         [HttpPut("{id}")]
 
-        public IActionResult UpdateProduct(int id, [FromBody] ProductDto productDto)
+        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductDto productDto)
         {
-            _productServices.UpdateProduct(id, productDto);
+            await _productServices.UpdateProduct(id, productDto);
             return Ok();
         }
 
@@ -151,7 +163,6 @@ namespace BabyBackend.Controllers
             }
             return ImageUrl;
         }
-
 
 
     }

@@ -2,7 +2,9 @@
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.OpenApi.Validations;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BabyBackend.Services.CartService
 {
@@ -15,10 +17,15 @@ namespace BabyBackend.Services.CartService
             _dbContext = dbContext;
         }
 
-        public List<CartViewDto> GetCartItems(int userId)
+        public async Task<List<CartViewDto>> GetCartItems(int userId)
         {
-            var user = _dbContext.Users.Include(u => u.cart).ThenInclude(c => c.cartItems).ThenInclude(ci => ci.product).FirstOrDefault(u => u.Id == userId);
-            if(user != null)
+            var user = await _dbContext.Users
+                .Include(u => u.cart)
+                .ThenInclude(c => c.cartItems)
+                .ThenInclude(ci => ci.product)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            if (user != null)
             {
                 var cartItems = user.cart.cartItems.Select(ci => new CartViewDto
                 {
@@ -27,90 +34,116 @@ namespace BabyBackend.Services.CartService
                     Quantity = ci.Quantity,
                     Price = ci.product.Price,
                     TotalAmount = ci.product.Price * ci.Quantity
-                    
                 }).ToList();
 
                 return cartItems;
             }
+
             return new List<CartViewDto>();
         }
 
-        public void AddToCart(int userId, int productId)
+        public async Task AddToCart(int userId, int productId)
         {
-            var user = _dbContext.Users.Include(u => u.cart).ThenInclude(u => u.cartItems).FirstOrDefault(u => u.Id == userId);
-            var product = _dbContext.products.FirstOrDefault(p => p.Id == productId);
+            var user = await _dbContext.Users
+                .Include(u => u.cart)
+                .ThenInclude(u => u.cartItems)
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if(user != null &&  product != null)
+            var product = await _dbContext.products.FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (user != null && product != null)
             {
-                if(user.cart == null)
+                if (user.cart == null)
                 {
                     user.cart = new Cart
                     {
                         UserId = userId,
                         cartItems = new List<CartItem>()
-                        
                     };
                     _dbContext.cart.Add(user.cart);
-                    _dbContext.SaveChanges();
+                    await _dbContext.SaveChangesAsync();
                 }
-          
-            
-            var itemExist = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
 
-            if(itemExist != null)
-            {
-                itemExist.Quantity = itemExist.Quantity + 1;
-            }
-            else
-            {
-                var newCartItem = new CartItem
+                var itemExist = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
+
+                if (itemExist != null)
                 {
-                    CartId = user.cart.Id,
-                    ProductId = productId,
-                    Quantity = 1
-                };
+                    itemExist.Quantity = itemExist.Quantity + 1;
+                }
+                else
+                {
+                    var newCartItem = new CartItem
+                    {
+                        CartId = user.cart.Id,
+                        ProductId = productId,
+                        Quantity = 1
+                    };
 
-                _dbContext.cartItems.Add(newCartItem);
+                    _dbContext.cartItems.Add(newCartItem);
+                }
+
+                await _dbContext.SaveChangesAsync();
             }
-            _dbContext.SaveChanges();
-           }
         }
-        public void DeleteCart(int userId, int productId)
-        {
-            var user = _dbContext.Users.Include(u => u.cart).ThenInclude(u => u.cartItems).FirstOrDefault(u => u.Id == userId);
-            var product = _dbContext.products.FirstOrDefault(p => p.Id == productId);
 
-            if(user != null && product != null)
-            {
-                var item = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
-                _dbContext.cartItems.Remove(item);
-            }
-            _dbContext.SaveChanges();
-
-        }
-        public void QuantityPlus(int userId, int productId)
+        public async Task DeleteCart(int userId, int productId)
         {
-            var user = _dbContext.Users.Include(u => u.cart).ThenInclude(u => u.cartItems).FirstOrDefault(u => u.Id ==userId);
-            var product = _dbContext.products.FirstOrDefault(p => p.Id == productId);
+            var user = await _dbContext.Users
+                .Include(u => u.cart)
+                .ThenInclude(u => u.cartItems)
+                .FirstOrDefaultAsync(u => u.Id == userId);
 
-            if(user != null && product !=null)
-            {
-                var item = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
-                item.Quantity = item.Quantity + 1;
-            }
-            _dbContext.SaveChanges();
-        }
-        public void QuantityMin(int userId, int productId)
-        {
-            var user = _dbContext.Users.Include(u => u.cart).ThenInclude(u => u.cartItems).FirstOrDefault(u => u.Id == userId);
-            var product = _dbContext.products.FirstOrDefault(p => p.Id == productId);
+            var product = await _dbContext.products.FirstOrDefaultAsync(p => p.Id == productId);
 
             if (user != null && product != null)
             {
                 var item = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
-                item.Quantity = item.Quantity - 1;
+                if (item != null)
+                {
+                    _dbContext.cartItems.Remove(item);
+                    await _dbContext.SaveChangesAsync();
+                }
             }
-            _dbContext.SaveChanges();
+        }
+
+        public async Task QuantityPlus(int userId, int productId)
+        {
+            var user = await _dbContext.Users
+                .Include(u => u.cart)
+                .ThenInclude(u => u.cartItems)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            var product = await _dbContext.products.FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (user != null && product != null)
+            {
+                var item = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
+                if (item != null)
+                {
+                    item.Quantity = item.Quantity + 1;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
+        }
+
+        public async Task QuantityMin(int userId, int productId)
+        {
+            var user = await _dbContext.Users
+                .Include(u => u.cart)
+                .ThenInclude(u => u.cartItems)
+                .FirstOrDefaultAsync(u => u.Id == userId);
+
+            var product = await _dbContext.products.FirstOrDefaultAsync(p => p.Id == productId);
+
+            if (user != null && product != null)
+            {
+                var item = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
+                if (item != null)
+                {
+                    item.Quantity = item.Quantity - 1;
+                    await _dbContext.SaveChangesAsync();
+                }
+            }
         }
     }
 }

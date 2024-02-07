@@ -5,13 +5,13 @@ namespace BabyBackend.Services.ProductService
 {
     public interface IProductServices
     {
-        List<ProductViewDto> GetProducts();
-        ProductViewDto GetProductById(int id);
-        List<ProductViewDto> GetProductByCategory(int  categoryId);
-        //void UploadImage();
-        void AddProduct(ProductDto productDto);
-        void UpdateProduct(int id ,ProductDto productDto);
-        void DeleteProduct(int id);
+        Task<List<ProductViewDto>> GetProducts();
+        Task<ProductViewDto> GetProductById(int id);
+        Task<List<ProductViewDto>> GetProductByCategory(int categoryId);
+        Task<List<ProductViewDto>> ProductPagination(int pageNumber = 1, int pageSize = 10);
+         Task AddProduct(ProductDto productDto);
+        Task UpdateProduct(int id, ProductDto productDto);
+        Task DeleteProduct(int id);
 
 
 

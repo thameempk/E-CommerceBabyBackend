@@ -3,7 +3,10 @@ using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using Microsoft.EntityFrameworkCore;
 using Razorpay.Api;
-using System.Net.WebSockets;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BabyBackend.Services.OrderService
 {
@@ -17,23 +20,24 @@ namespace BabyBackend.Services.OrderService
             _configuration = configuration;
             _dbContext = dbContext;
         }
-        public string  OrderCreate(long price)
+
+        public async Task<string> OrderCreate(long price)
         {
             Dictionary<string, object> input = new Dictionary<string, object>();
             Random random = new Random();
             string TrasactionId = random.Next(0, 1000).ToString();
-            input.Add("amount", Convert.ToDecimal(price)*100);
+            input.Add("amount", Convert.ToDecimal(price) * 100);
             input.Add("currency", "INR");
             input.Add("receipt", TrasactionId);
 
             string key = _configuration["Razorpay:KeyId"];
             string secret = _configuration["Razorpay:KeySecret"];
-                   
+
             RazorpayClient client = new RazorpayClient(key, secret);
 
-            Razorpay.Api.Order order = client.Order.Create(input);
+            Razorpay.Api.Order order =  client.Order.Create(input);
             var OrderId = order["id"].ToString();
-            
+
             return OrderId;
         }
 
@@ -47,56 +51,73 @@ namespace BabyBackend.Services.OrderService
             Utils.verifyPaymentSignature(attributes);
             List<OrderDetailsDto> orderList = new List<OrderDetailsDto>
             {
-               new OrderDetailsDto 
-               {
-                TransactionId = razorpay.raz_pay_id,
-                OrderId = razorpay.raz_ord_id
-               }
-        };
-            
+                new OrderDetailsDto
+                {
+                    TransactionId = razorpay.raz_pay_id,
+                    OrderId = razorpay.raz_ord_id
+                }
+            };
+
 
             return orderList;
         }
 
-
-        public void CreateOrder(int userId, List<CartViewDto> cartViews)
+        public async Task<bool> CreateOrder(int userId, OrderRequestDto orderRequests)
         {
-
-            var order = new OrderMain
+            try
             {
-                userId = userId,
-                OrderDate = DateTime.Now,
-
-                OrderItems = cartViews.Select(cv => new OrderItem
+                if (orderRequests.TransactionId == null && orderRequests.OrderString == null)
                 {
-                    ProductId = cv.ProductId,
-                    Quantity = cv.Quantity,
-                    TotalPrice = cv.Price * cv.Quantity
-                }).ToList()
+                    return false;
+                }
+                var order = new OrderMain
+                {
+                    userId = userId,
+                    OrderDate = DateTime.Now,
+                    CustomerCity = orderRequests.CustomerCity,
+                    CustomerEmail = orderRequests.CustomerEmail,
+                    CustomerName = orderRequests.CustomerName,
+                    CustomerPhone = orderRequests.CustomerPhone,
+                    HomeAddress = orderRequests.HomeAddress,
+                    OrderStatus = orderRequests.OrderStatus,
+                    OrderString = orderRequests.OrderString,
+                    TransactionId = orderRequests.TransactionId,
+                    OrderItems = orderRequests.CartViews.Select(cv => new OrderItem
+                    {
+                        ProductId = cv.ProductId,
+                        Quantity = cv.Quantity,
+                        TotalPrice = cv.Quantity * cv.Price
+                    }).ToList()
+                };
 
-            };
-
-            _dbContext.orders.Add(order);
-            _dbContext.SaveChanges();
-
-            
+                _dbContext.orders.Add(order);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
         }
 
-        public List<OrderViewDto> GetOrderDtails(int userId)
+        public async Task<List<OrderViewDto>> GetOrderDtails(int userId)
         {
-            var order = _dbContext.orders.Include(o => o.OrderItems).ThenInclude(p => p.Product).FirstOrDefault(o => o.userId == userId);
+            var order = await _dbContext.orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(p => p.Product)
+                .FirstOrDefaultAsync(o => o.userId == userId);
 
-            if(order != null )
+            if (order != null)
             {
                 var orderDetails = order.OrderItems.Select(o => new OrderViewDto
                 {
-                  
-                        Id = o.Id,
-                        OrderDate = o.Order.OrderDate,
-                        ProductName = o.Product.ProductName,
-                        Quantity = o.Quantity,
-                        TotalPrice = o.TotalPrice,
-                    
+                    Id = o.Id,
+                    OrderDate = o.Order.OrderDate,
+                    ProductName = o.Product.ProductName,
+                    Quantity = o.Quantity,
+                    TotalPrice = o.TotalPrice,
+                    OrderId = order.OrderString,
+                    OrderStatus = order.OrderStatus
                 }).ToList();
 
                 return orderDetails;
@@ -105,23 +126,89 @@ namespace BabyBackend.Services.OrderService
             return new List<OrderViewDto>();
         }
 
-
-        public decimal GetTotalRevenue()
+        public async Task<List<OrderAdminViewDto>> GetOrderDetailAdmin()
         {
-            var order = _dbContext.orders.Include(o => o.OrderItems);
+            var orders = await _dbContext.orders.Include(o => o.OrderItems).ToListAsync();
 
-            if(order != null)
+            if (orders != null)
+            {
+                var orderdet = orders.Select(o => new OrderAdminViewDto
+                {
+                    Id = o.Id,
+                    CustomerEmail = o.CustomerEmail,
+                    CustomerName = o.CustomerName,
+                    OrderId = o.OrderString,
+                    TransactionId = o.TransactionId,
+                    OrderDate = o.OrderDate,
+                    OrderStatus = o.OrderStatus
+                }).ToList();
+
+                return orderdet;
+            }
+
+            return new List<OrderAdminViewDto>();
+        }
+
+        public async Task<OrderAdminDetailViewDto> GetOrderDetailsById(int orderId)
+        {
+            var orders = await _dbContext.orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(oi => oi.Product)
+                .FirstOrDefaultAsync(o => o.Id == orderId);
+
+            if (orders != null)
+            {
+                var orderdet = new OrderAdminDetailViewDto
+                {
+                    Id = orderId,
+                    CustomerEmail = orders.CustomerEmail,
+                    CustomerName = orders.CustomerName,
+                    CustomerCity = orders.CustomerCity,
+                    OrderStatus = orders.OrderStatus,
+                    CustomerPhone = orders.CustomerPhone,
+                    OrderString = orders.OrderString,
+                    HomeAddress = orders.HomeAddress,
+                    TransactionId = orders.TransactionId,
+                    OrderDate = orders.OrderDate,
+                    orderProducts = orders.OrderItems.Select(oi => new CartViewDto
+                    {
+                        ProductId = oi.ProductId,
+                        ProductName = oi.Product.ProductName,
+                        Price = oi.Product.Price,
+                        Quantity = oi.Quantity,
+                        TotalAmount = oi.TotalPrice
+                    }).ToList()
+                };
+                return orderdet;
+            }
+
+            return new OrderAdminDetailViewDto();
+        }
+
+        public async Task<decimal> GetTotalRevenue()
+        {
+            var order = await _dbContext.orders.Include(o => o.OrderItems).ToListAsync();
+
+            if (order != null)
             {
                 var orderdet = order.SelectMany(o => o.OrderItems);
                 var totalIncome = orderdet.Sum(od => od.TotalPrice);
-
                 return totalIncome;
-
             }
+
             return 0;
         }
 
-
-
+        public async Task<bool> UpdateOrder(int orderId, OrderAdminViewDto orderAdminView)
+        {
+            var order = await _dbContext.orders.FindAsync(orderId);
+            if (order != null)
+            {
+                order.OrderStatus = orderAdminView.OrderStatus;
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
+        }
     }
 }

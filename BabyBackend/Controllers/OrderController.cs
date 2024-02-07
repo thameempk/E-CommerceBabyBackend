@@ -19,9 +19,9 @@ namespace BabyBackend.Controllers
 
         [HttpPost("order-create")]
 
-        public ActionResult createOrder(long price)
+        public async Task<ActionResult> createOrder(long price)
         {
-            var orderId =_orderServices.OrderCreate(price);
+            var orderId = await _orderServices.OrderCreate(price);
             return Ok(orderId);
 
         }
@@ -29,7 +29,7 @@ namespace BabyBackend.Controllers
 
         [HttpPost("payment")]
 
-        public ActionResult Payment(RazorpayDto razorpay)
+        public  ActionResult Payment(RazorpayDto razorpay)
         {
             var con = _orderServices.Payment(razorpay);
             return Ok(con);
@@ -38,9 +38,9 @@ namespace BabyBackend.Controllers
 
         [HttpPost("place-Order")]
 
-        public ActionResult PlaceOrder(int userId, List<CartViewDto> cartViews)
+        public async Task<ActionResult> PlaceOrder(int userId, OrderRequestDto orderRequests)
         {
-            _orderServices.CreateOrder(userId, cartViews);
+            await _orderServices.CreateOrder(userId, orderRequests);
             return Ok();
         }
 
@@ -48,17 +48,32 @@ namespace BabyBackend.Controllers
 
         [HttpGet("get_order_details")]
 
-        public ActionResult GetOrderDetails (int userId)
+        public async Task<ActionResult> GetOrderDetails (int userId)
         {
             
-            return Ok(_orderServices.GetOrderDtails(userId));
+            return Ok(await _orderServices.GetOrderDtails(userId));
         }
 
         [HttpGet("total_revenue")]
 
-        public ActionResult GetTotalRevenue()
+        public async Task<ActionResult> GetTotalRevenue()
         {
-            return Ok(_orderServices.GetTotalRevenue());
+            return Ok(await _orderServices.GetTotalRevenue());
+        }
+
+        [HttpGet("get-order-details-admin")]
+
+        public async Task<ActionResult> GetOrderDetailsAdmin()
+        {
+            return Ok(await _orderServices.GetOrderDetailAdmin());
+
+        }
+
+        [HttpGet("get-detailed-order")]
+
+        public async Task<ActionResult> GetDetailedOrder(int orderId)
+        {
+            return Ok(await _orderServices.GetOrderDetailsById(orderId));
         }
     }
 }

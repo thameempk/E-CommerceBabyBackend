@@ -12,5 +12,9 @@
         
         public DateTime OrderDate {  get; set; }
 
+        public string OrderId {  get; set; }
+
+        public string OrderStatus {  get; set; }
+
     }
 }

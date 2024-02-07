@@ -5,6 +5,9 @@ using BabyBackend.Migrations;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BabyBackend.Services.WhishListService
 {
@@ -19,7 +22,7 @@ namespace BabyBackend.Services.WhishListService
             _mapper = mapper;
         }
 
-        public void AddToWhishList(int userId, int productId)
+        public async Task AddToWhishList(int userId, int productId)
         {
             WhishListDto whishListDto = new WhishListDto
             {
@@ -28,17 +31,27 @@ namespace BabyBackend.Services.WhishListService
             };
             var wMapper = _mapper.Map<WhishList>(whishListDto);
             _dbContext.whishLists.Add(wMapper);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
-        public void RemoveWhishList(int whishListId)
+
+        public async Task RemoveWhishList(int whishListId)
         {
-            var wList = _dbContext.whishLists.Find(whishListId);
-            _dbContext.whishLists.Remove(wList);
-            _dbContext.SaveChanges();
+            var wList = await _dbContext.whishLists.FindAsync(whishListId);
+            if (wList != null)
+            {
+                _dbContext.whishLists.Remove(wList);
+                await _dbContext.SaveChangesAsync();
+            }
         }
-        public List<WhishListViewDto> GetWhishLists(int userId)
+
+        public async Task<List<WhishListViewDto>> GetWhishLists(int userId)
         {
-            var wList = _dbContext.whishLists.Include(w => w.products).ThenInclude(p => p.Category).Where(u => u.UserId == userId).ToList();
+            var wList = await _dbContext.whishLists
+                .Include(w => w.products)
+                .ThenInclude(p => p.Category)
+                .Where(u => u.UserId == userId)
+                .ToListAsync();
+
             var wView = wList.Select(w => new WhishListViewDto
             {
                 Id = w.Id,
@@ -49,9 +62,6 @@ namespace BabyBackend.Services.WhishListService
             }).ToList();
 
             return wView;
-
         }
-
-
     }
 }

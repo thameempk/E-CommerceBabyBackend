@@ -25,26 +25,26 @@ namespace BabyBackend.Controllers
 
         [HttpGet]
 
-        public ActionResult GetUsers()
+        public async Task<ActionResult> GetUsers()
         {
-            return Ok(_userServices.GetUsers());
+            return Ok(await _userServices.GetUsers());
         }
 
 
         [HttpGet("{id}")]
 
-        public ActionResult GetUserById(int id)
+        public async Task<ActionResult> GetUserById(int id)
         {
-            return Ok(_userServices.GetUserById(id));
+            return Ok(await _userServices.GetUserById(id));
         }
 
         [HttpPost("register")]
 
-        public ActionResult RegisterUser([FromBody] UserRegisterDto userRegister)
+        public async Task<ActionResult> RegisterUser([FromBody] UserRegisterDto userRegister)
         {
             try
             {
-                var isExist = _userServices.RegisterUser(userRegister);
+                var isExist = await _userServices.RegisterUser(userRegister);
                 if (!isExist)
                 {
                     return BadRequest("user already exist");
@@ -59,10 +59,10 @@ namespace BabyBackend.Controllers
 
         [HttpPost("login")]
 
-        public ActionResult  Login([FromBody] LoginDto login)
+        public async Task<ActionResult> Login([FromBody] LoginDto login)
         {
             
-            var existingUser =  _userServices.Login(login);
+            var existingUser = await _userServices.Login(login);
 
             if(existingUser == null)
             {

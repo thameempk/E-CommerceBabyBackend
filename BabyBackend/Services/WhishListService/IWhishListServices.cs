@@ -6,8 +6,8 @@ namespace BabyBackend.Services.WhishListService
 {
     public interface IWhishListServices
     {
-        void AddToWhishList(int userId, int productId);
-        void RemoveWhishList(int whishListId);
-        List<WhishListViewDto> GetWhishLists(int userId);
+         Task AddToWhishList(int userId, int productId);
+        Task RemoveWhishList(int whishListId);
+        Task<List<WhishListViewDto>> GetWhishLists(int userId);
     }
 }

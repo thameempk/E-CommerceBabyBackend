@@ -9,6 +9,8 @@
         public decimal TotalPrice {  get; set; }
         public int Quantity { get; set; }
 
+        
+
         public virtual OrderMain Order { get; set; }
         public virtual Product Product { get; set; }
     }

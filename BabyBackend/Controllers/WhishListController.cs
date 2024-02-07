@@ -17,24 +17,24 @@ namespace BabyBackend.Controllers
 
         [HttpGet("get-whishlist")]
 
-        public ActionResult GetWhishLists(int userId)
+        public async Task<ActionResult> GetWhishLists(int userId)
         {
-            return Ok(_whishLis.GetWhishLists(userId));
+            return Ok(await _whishLis.GetWhishLists(userId));
         }
 
         [HttpPost("add-whishlist")]
 
-        public ActionResult AddWhishList(int  userId, int productId)
+        public async Task<ActionResult> AddWhishList(int  userId, int productId)
         {
-            _whishLis.AddToWhishList(userId, productId);
+            await _whishLis.AddToWhishList(userId, productId);
             return Ok();
         }
 
         [HttpDelete("remove-whishlist")]
 
-        public ActionResult DeleteWhishList(int wId)
+        public async Task<ActionResult> DeleteWhishList(int wId)
         {
-            _whishLis.RemoveWhishList(wId);
+            await _whishLis.RemoveWhishList(wId);
             return Ok();
         }
 

@@ -2,6 +2,10 @@
 using BabyBackend.Models.Dto;
 using BabyBackend.Models;
 using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace BabyBackend.Services.CategoryService
 {
@@ -16,37 +20,43 @@ namespace BabyBackend.Services.CategoryService
             _mapper = mapper;
         }
 
-        public List<CategoryViewDto>  GetCategories()
+        public async Task<List<CategoryViewDto>> GetCategories()
         {
-            var cat = _dbContext.categories.ToList();
-            var categories = _mapper.Map<List<CategoryViewDto>>(cat);
-            return categories;
-          
-        }
-        public CategoryViewDto GetCategoryById(int id)
-        {
-            var cat = _dbContext.categories.FirstOrDefault(c => c.Id == id);
-            var category = _mapper.Map<CategoryViewDto>(cat);
-            return category;
+            var categories = await _dbContext.categories.ToListAsync();
+            return _mapper.Map<List<CategoryViewDto>>(categories);
         }
 
-        public void AddCategory(CategoryDto categoryDto)
+        public async Task<CategoryViewDto> GetCategoryById(int id)
+        {
+            var category = await _dbContext.categories.FirstOrDefaultAsync(c => c.Id == id);
+            return _mapper.Map<CategoryViewDto>(category);
+        }
+
+        public async Task AddCategory(CategoryDto categoryDto)
         {
             var category = _mapper.Map<Category>(categoryDto);
             _dbContext.categories.Add(category);
-            _dbContext.SaveChanges();
+            await _dbContext.SaveChangesAsync();
         }
-        public void DeleteCategory(int id)
+
+        public async Task DeleteCategory(int id)
         {
-            var cat = _dbContext.categories.FirstOrDefault(c => c.Id == id);    
-            _dbContext.categories.Remove(cat);
-            _dbContext.SaveChanges();
+            var category = await _dbContext.categories.FirstOrDefaultAsync(c => c.Id == id);
+            if (category != null)
+            {
+                _dbContext.categories.Remove(category);
+                await _dbContext.SaveChangesAsync();
+            }
         }
-        public void UpdateCategory(int id, CategoryDto categoryDto)
+
+        public async Task UpdateCategory(int id, CategoryDto categoryDto)
         {
-            var cat = _dbContext.categories.FirstOrDefault(c => c.Id == id);
-            cat.Name = categoryDto.Name;
-            _dbContext.SaveChanges();
+            var category = await _dbContext.categories.FirstOrDefaultAsync(c => c.Id == id);
+            if (category != null)
+            {
+                category.Name = categoryDto.Name;
+                await _dbContext.SaveChangesAsync();
+            }
         }
     }
 }

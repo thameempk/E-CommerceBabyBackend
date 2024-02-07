@@ -5,10 +5,10 @@ namespace BabyBackend.Services.UserService
 {
     public interface IUserServices
     {
-        bool RegisterUser(UserRegisterDto userRegister);
-        List<UserViewDto> GetUsers();
-        UserViewDto GetUserById(int id);
-        Users Login(LoginDto login);
+        Task<bool> RegisterUser(UserRegisterDto userRegister);
+        Task<List<UserViewDto>> GetUsers();
+        Task<UserViewDto> GetUserById(int id);
+        Task<Users> Login(LoginDto login);
 
 
     }
