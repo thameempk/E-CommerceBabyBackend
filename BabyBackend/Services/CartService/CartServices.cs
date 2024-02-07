@@ -33,7 +33,8 @@ namespace BabyBackend.Services.CartService
                     ProductName = ci.product.ProductName,
                     Quantity = ci.Quantity,
                     Price = ci.product.Price,
-                    TotalAmount = ci.product.Price * ci.Quantity
+                    TotalAmount = ci.product.Price * ci.Quantity,
+                    ProductImage = ci.product.ProductImage,
                 }).ToList();
 
                 return cartItems;

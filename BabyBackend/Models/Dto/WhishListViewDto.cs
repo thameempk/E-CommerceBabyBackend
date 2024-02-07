@@ -8,5 +8,7 @@
         public string ProductDescription { get; set; }
         public decimal Price {  get; set; }
         public string Category {  get; set; }
+
+        public string ProductImage {  get; set; }
     }
 }

@@ -20,38 +20,73 @@ namespace BabyBackend.Controllers
         [HttpGet]
         public async Task<ActionResult> GetCategories()
         {
-            return Ok(await _categoryServices.GetCategories());
+            try
+            {
+                return Ok(await _categoryServices.GetCategories());
+            }catch(Exception ex)
+            {
+                return StatusCode(500,ex.Message);
+            }
+            
         }
 
         [HttpGet("{id}")]
 
         public async Task<ActionResult> GetCategoryById(int id)
         {
-            return Ok(await _categoryServices.GetCategoryById(id));
+            try
+            {
+                return Ok(await _categoryServices.GetCategoryById(id));
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
         [HttpPost]
 
         public async Task<IActionResult> AddCategory([FromBody] CategoryDto categoryDto)
         {
-            await _categoryServices.AddCategory(categoryDto);
-            return Ok();
+            try
+            {
+                await _categoryServices.AddCategory(categoryDto);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+                       
         }
 
         [HttpPut("{id}")]
 
         public async Task<IActionResult> UpdateCategory(int id , [FromBody] CategoryDto categoryDto)
         {
-            await _categoryServices.UpdateCategory(id, categoryDto);
-            return Ok();
+            try
+            {
+                await _categoryServices.UpdateCategory(id, categoryDto);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+                    
         }
 
         [HttpDelete("{id}")]
 
         public async Task<IActionResult> DeleteCategory(int id)
         {
-            await _categoryServices.DeleteCategory(id);
-            return Ok();
+            try
+            {
+                await _categoryServices.DeleteCategory(id);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
     }
 }

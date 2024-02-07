@@ -26,9 +26,16 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetProducts()
         {
-            var products = await _productServices.GetProducts();
+            try
+            {
+                var products = await _productServices.GetProducts();
+
+                return Ok(products);
+            }catch(Exception ex)
+            {
+                return StatusCode(500,ex.Message);
+            }
             
-           return Ok(products);
 
         }
 
@@ -39,8 +46,15 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> PaginatedProduct([FromQuery] int pageNumber = 1 , [FromQuery] int PageSize = 10)
         {
+            try
+            {
+                return Ok(await _productServices.ProductPagination(pageNumber, PageSize));
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
             
-            return Ok(await _productServices.ProductPagination(pageNumber, PageSize));
+            
         }
 
 
@@ -48,8 +62,15 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetProdectById(int id)
         {
-            var products = await _productServices.GetProductById(id);
-            return Ok(products);
+            try
+            {
+                var products = await _productServices.GetProductById(id);
+                return Ok(products);
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
 
@@ -57,31 +78,59 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetProductByCategory(int categoryId)
         {
-            return Ok(await _productServices.GetProductByCategory(categoryId));
+            try
+            {
+                return Ok(await _productServices.GetProductByCategory(categoryId));
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
         [HttpPost]
 
         public async Task<IActionResult> AddProduct([FromForm] ProductDto productDto , IFormFile image)
         {
-            await _productServices.AddProduct(productDto,image);
-            return Ok();
+            try
+            {
+                await _productServices.AddProduct(productDto, image);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
         [HttpDelete("{id}")]
 
         public async Task<IActionResult> DeleteProduct(int id)
         {
-            await _productServices.DeleteProduct(id);
-            return Ok();
+            try
+            {
+                await _productServices.DeleteProduct(id);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
         [HttpPut("{id}")]
 
         public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductDto productDto, IFormFile image)
         {
-            await _productServices.UpdateProduct(id, productDto, image);
-            return Ok();
+            try
+            {
+                await _productServices.UpdateProduct(id, productDto, image);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
        

@@ -51,17 +51,25 @@ namespace BabyBackend.Services.WhishListService
                 .ThenInclude(p => p.Category)
                 .Where(u => u.UserId == userId)
                 .ToListAsync();
-
-            var wView = wList.Select(w => new WhishListViewDto
+            if(wList != null)
             {
-                Id = w.Id,
-                ProductName = w.products?.ProductName,
-                ProductDescription = w.products?.ProductDescription,
-                Price = w.products.Price,
-                Category = w.products?.Category.Name
-            }).ToList();
+                var wView = wList.Select(w => new WhishListViewDto
+                {
+                    Id = w.Id,
+                    ProductName = w.products?.ProductName,
+                    ProductDescription = w.products?.ProductDescription,
+                    Price = w.products.Price,
+                    Category = w.products?.Category.Name,
+                    ProductImage = w.products.ProductImage
 
-            return wView;
+                }).ToList();
+
+                return wView;
+            }else
+            {
+                return new List<WhishListViewDto>();
+            }
+            
         }
     }
 }

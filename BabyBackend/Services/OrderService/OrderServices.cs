@@ -114,6 +114,7 @@ namespace BabyBackend.Services.OrderService
                     Id = o.Id,
                     OrderDate = o.Order.OrderDate,
                     ProductName = o.Product.ProductName,
+                    ProductImage = o.Product.ProductImage,
                     Quantity = o.Quantity,
                     TotalPrice = o.TotalPrice,
                     OrderId = order.OrderString,
@@ -176,7 +177,9 @@ namespace BabyBackend.Services.OrderService
                         ProductName = oi.Product.ProductName,
                         Price = oi.Product.Price,
                         Quantity = oi.Quantity,
-                        TotalAmount = oi.TotalPrice
+                        TotalAmount = oi.TotalPrice,
+                        ProductImage = oi.Product.ProductImage
+                        
                     }).ToList()
                 };
                 return orderdet;

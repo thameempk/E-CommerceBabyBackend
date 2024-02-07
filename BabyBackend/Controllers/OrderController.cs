@@ -1,6 +1,8 @@
-﻿using BabyBackend.Models.Dto;
+﻿using BabyBackend.Models;
+using BabyBackend.Models.Dto;
 using BabyBackend.Services.OrderService;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BabyBackend.Controllers
@@ -21,8 +23,19 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> createOrder(long price)
         {
-            var orderId = await _orderServices.OrderCreate(price);
-            return Ok(orderId);
+            try
+            {
+                if(price <= 0)
+                {
+                    return BadRequest("enter a valid money ");
+                }
+                var orderId = await _orderServices.OrderCreate(price);
+                return Ok(orderId);
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+            
 
         }
 
@@ -31,8 +44,19 @@ namespace BabyBackend.Controllers
 
         public  ActionResult Payment(RazorpayDto razorpay)
         {
-            var con = _orderServices.Payment(razorpay);
-            return Ok(con);
+            try
+            {
+                if(razorpay == null)
+                {
+                    return BadRequest("razorpay must not null here");
+                }
+                var con = _orderServices.Payment(razorpay);
+                return Ok(con);
+            }catch(Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+            
         }
 
 
@@ -40,8 +64,20 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> PlaceOrder(int userId, OrderRequestDto orderRequests)
         {
-            await _orderServices.CreateOrder(userId, orderRequests);
-            return Ok();
+            try
+            {
+                if(orderRequests == null || userId == null)
+                {
+                    return BadRequest();
+                }
+                await _orderServices.CreateOrder(userId, orderRequests);
+                return Ok();
+            }
+            catch( Exception e )
+            {
+                return StatusCode(500, e.Message);
+            }
+            
         }
 
 
@@ -50,22 +86,50 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetOrderDetails (int userId)
         {
+            try
+            {
+                if(userId <= 0)
+                {
+                    return BadRequest();
+                }
+                return Ok(await _orderServices.GetOrderDtails(userId));
+             
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+
             
-            return Ok(await _orderServices.GetOrderDtails(userId));
         }
 
         [HttpGet("total_revenue")]
 
         public async Task<ActionResult> GetTotalRevenue()
         {
-            return Ok(await _orderServices.GetTotalRevenue());
+            try
+            {
+                return Ok(await _orderServices.GetTotalRevenue());
+            }catch(Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+            
+            
         }
 
         [HttpGet("get-order-details-admin")]
 
         public async Task<ActionResult> GetOrderDetailsAdmin()
         {
-            return Ok(await _orderServices.GetOrderDetailAdmin());
+            try
+            {
+                return Ok(await _orderServices.GetOrderDetailAdmin());
+            }catch( Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+            
 
         }
 
@@ -73,7 +137,14 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetDetailedOrder(int orderId)
         {
-            return Ok(await _orderServices.GetOrderDetailsById(orderId));
+            try
+            {
+                return Ok(await _orderServices.GetOrderDetailsById(orderId));
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+           
         }
     }
 }

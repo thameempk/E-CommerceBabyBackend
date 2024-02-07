@@ -27,7 +27,14 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetUsers()
         {
-            return Ok(await _userServices.GetUsers());
+            try
+            {
+                return Ok(await _userServices.GetUsers());
+            }catch (Exception ex)
+            {
+                return StatusCode(500,ex.Message);
+            }
+            
         }
 
 
@@ -35,7 +42,14 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetUserById(int id)
         {
-            return Ok(await _userServices.GetUserById(id));
+            try
+            {
+                return Ok(await _userServices.GetUserById(id));
+            }catch(Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+            
         }
 
         [HttpPost("register")]
@@ -61,21 +75,28 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> Login([FromBody] LoginDto login)
         {
+            try
+            {
+                var existingUser = await _userServices.Login(login);
+
+                if (existingUser == null)
+                {
+                    return NotFound("user name or password incorrect");
+                }
+                bool validatePassword = BCrypt.Net.BCrypt.Verify(login.Password, existingUser.Password);
+                if (!validatePassword)
+                {
+                    return BadRequest("password doesn't match");
+                }
+                string token = GenerateToken(existingUser);
+
+                return Ok(new { Token = token });
+            }catch(Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
             
-            var existingUser = await _userServices.Login(login);
-
-            if(existingUser == null)
-            {
-                return NotFound("user name or password incorrect");
-            }
-            bool validatePassword = BCrypt.Net.BCrypt.Verify(login.Password, existingUser.Password);
-            if(!validatePassword)
-            {
-                return BadRequest("password doesn't match");
-            }
-            string token = GenerateToken(existingUser);
-
-            return Ok(new { Token = token });
+           
 
         }
 

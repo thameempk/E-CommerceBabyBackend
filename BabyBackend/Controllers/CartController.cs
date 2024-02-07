@@ -19,37 +19,72 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetCartItems(int userId)
         {
-            return Ok(await _cartServices.GetCartItems(userId));
+            try
+            {
+                return Ok(await _cartServices.GetCartItems(userId));
+            }catch(Exception ex)
+            {
+                return StatusCode(500,ex.Message);
+            }
+            
         }
 
         [HttpPost("add-to-cart")]
         public async Task<ActionResult> AddToCart(int userId, int productId )
         {
-           await _cartServices.AddToCart(userId, productId);
-            return Ok();
+            try
+            {
+                await _cartServices.AddToCart(userId, productId);
+                return Ok();
+            }catch( Exception ex )
+            {
+                return StatusCode(500,ex.Message);
+            }
+           
         }
 
         [HttpPut("add-quantity")]
         public async Task<IActionResult> QuantityAdd(int userId, int productId)
         {
-            await _cartServices.QuantityPlus(userId, productId);
-            return Ok();
+            try
+            {
+                await _cartServices.QuantityPlus(userId, productId);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
         [HttpPut("min-quantity")]
 
         public async Task<IActionResult> QuantityMin(int userId, int productId)
         {
-            await _cartServices.QuantityMin(userId, productId);
-            return Ok();
+            try
+            {
+                await _cartServices.QuantityMin(userId, productId);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+            
         }
 
         [HttpDelete("remove-cart-item")]
 
         public async Task<ActionResult> RemoveCartItem(int userId, int productId)
         {
-            await _cartServices.DeleteCart( userId,  productId);
-            return Ok(true);
+            try
+            {
+                await _cartServices.DeleteCart(userId, productId);
+                return Ok(true);
+            }catch(Exception e)
+            {
+                return StatusCode(500,e.Message);
+            }
+                    
         }
 
 

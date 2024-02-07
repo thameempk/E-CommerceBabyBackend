@@ -9,19 +9,22 @@ namespace BabyBackend.Services.ProductService
     public class ProductServices : IProductServices
     {
         private readonly BabyDbContext _dbContext;
+        private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
-        public ProductServices(BabyDbContext dbContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
+        public ProductServices(BabyDbContext dbContext, IMapper mapper, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
+            _configuration = configuration;
         }
 
         public async Task<List<ProductViewDto>> GetProducts()
         {
+
             var products = await _dbContext.products.Include(p => p.Category).ToListAsync();
-            if(products.Count > 0)
+            if (products.Count > 0)
             {
                 var productWithCategory = products.Select(p => new ProductViewDto
                 {
@@ -35,14 +38,18 @@ namespace BabyBackend.Services.ProductService
                 return productWithCategory;
             }
             return new List<ProductViewDto>();
-            
+
         }
+
+
+
 
         public async Task<ProductViewDto> GetProductById(int id)
         {
+
             var products = await _dbContext.products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
-            
-            if(products == null)
+
+            if (products == null)
             {
                 ProductViewDto product = new ProductViewDto
                 {
@@ -56,14 +63,18 @@ namespace BabyBackend.Services.ProductService
                 };
                 return product;
             }
+
             return new ProductViewDto();
 
-            
+
+
+
 
         }
 
         public async Task<List<ProductViewDto>> GetProductByCategory(int categoryId)
         {
+
             var products = await _dbContext.products.Include(p => p.Category).Where(p => p.CategoryId == categoryId).Select(p => new ProductViewDto
             {
                 Id = p.Id,
@@ -73,10 +84,11 @@ namespace BabyBackend.Services.ProductService
                 Category = p.Category.Name,
                 ProductImage = p.ProductImage
             }).ToListAsync();
-            
-           
-            return products;
-
+            if (products != null)
+            {
+                return products;
+            }
+            return new List<ProductViewDto>();
 
 
         }
@@ -86,6 +98,7 @@ namespace BabyBackend.Services.ProductService
             try
             {
                 string productImage = null;
+                string HostUrl = null;
 
                 if (image != null && image.Length > 0)
                 {
@@ -97,12 +110,12 @@ namespace BabyBackend.Services.ProductService
                         await image.CopyToAsync(stream);
                     }
 
-
-                    productImage = "/Uploads/Product/" + fileName;
+                    HostUrl = _configuration["HostUrl:url"];
+                    productImage = HostUrl + "/Uploads/Product/" + fileName;
                 }
                 else
                 {
-                    productImage = "/Uploads/common/noimage.png";
+                    productImage = HostUrl + "/Uploads/common/noimage.png";
                 }
 
 
@@ -133,10 +146,10 @@ namespace BabyBackend.Services.ProductService
                     product.ProductDescription = productDto.ProductDescription;
                     product.Price = productDto.Price;
 
-                    
+
                     if (image != null && image.Length > 0)
                     {
-                        
+
                         string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
                         string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "Uploads", "Product", fileName);
 
@@ -145,14 +158,15 @@ namespace BabyBackend.Services.ProductService
                             await image.CopyToAsync(stream);
                         }
 
-                       
+
                         product.ProductImage = "/Uploads/Product/" + fileName;
-                    }else
+                    }
+                    else
                     {
                         product.ProductImage = "/Uploads/common/noimage.png";
                     }
 
-                   
+
                     await _dbContext.SaveChangesAsync();
                 }
                 else
@@ -162,7 +176,7 @@ namespace BabyBackend.Services.ProductService
             }
             catch (Exception ex)
             {
-                
+
                 throw new Exception($"Error updating product with ID {id}: {ex.Message}", ex);
             }
         }
@@ -196,7 +210,9 @@ namespace BabyBackend.Services.ProductService
 
 
 
-        
+
 
     }
+
 }
+

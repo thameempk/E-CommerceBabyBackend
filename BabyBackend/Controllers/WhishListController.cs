@@ -19,23 +19,44 @@ namespace BabyBackend.Controllers
 
         public async Task<ActionResult> GetWhishLists(int userId)
         {
-            return Ok(await _whishLis.GetWhishLists(userId));
+            try
+            {
+                return Ok(await _whishLis.GetWhishLists(userId));
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message); 
+            }
+           
         }
 
         [HttpPost("add-whishlist")]
 
         public async Task<ActionResult> AddWhishList(int  userId, int productId)
         {
-            await _whishLis.AddToWhishList(userId, productId);
-            return Ok();
+            try
+            {
+                await _whishLis.AddToWhishList(userId, productId);
+                return Ok();
+            }catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+            
         }
 
         [HttpDelete("remove-whishlist")]
 
         public async Task<ActionResult> DeleteWhishList(int wId)
         {
-            await _whishLis.RemoveWhishList(wId);
-            return Ok();
+            try
+            {
+                await _whishLis.RemoveWhishList(wId);
+                return Ok();
+            }catch(Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+           
         }
 
     }
