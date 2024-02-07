@@ -27,13 +27,7 @@ namespace BabyBackend.Controllers
         public async Task<ActionResult> GetProducts()
         {
             var products = await _productServices.GetProducts();
-            if(products != null && products.Count > 0)
-            {
-                foreach (var p in products)
-                {
-                    p.ProductImage = GetImageById(p.Id);
-                }
-            }
+            
            return Ok(products);
 
         }
@@ -55,10 +49,6 @@ namespace BabyBackend.Controllers
         public async Task<ActionResult> GetProdectById(int id)
         {
             var products = await _productServices.GetProductById(id);
-            if (products != null)
-            {
-                products.ProductImage = GetImageById(products.Id);
-            }
             return Ok(products);
         }
 
@@ -72,9 +62,9 @@ namespace BabyBackend.Controllers
 
         [HttpPost]
 
-        public async Task<IActionResult> AddProduct([FromBody] ProductDto productDto )
+        public async Task<IActionResult> AddProduct([FromForm] ProductDto productDto , IFormFile image)
         {
-            await _productServices.AddProduct(productDto);
+            await _productServices.AddProduct(productDto,image);
             return Ok();
         }
 
@@ -88,81 +78,16 @@ namespace BabyBackend.Controllers
 
         [HttpPut("{id}")]
 
-        public async Task<IActionResult> UpdateProduct(int id, [FromBody] ProductDto productDto)
+        public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductDto productDto, IFormFile image)
         {
-            await _productServices.UpdateProduct(id, productDto);
+            await _productServices.UpdateProduct(id, productDto, image);
             return Ok();
         }
 
-        [HttpPost("UploadImage")]
+       
 
-        public async Task<ActionResult> UploadImage()
-        {
-            var files = Request.Form.Files;
-            foreach(IFormFile file in files)
-            {
-                string FileName = file.FileName;
-                string FilePath = GetFilePath(FileName);
 
-                if(!System.IO.Directory.Exists(FilePath))
-                {
-                    System.IO.Directory.CreateDirectory(FilePath);
-                }
 
-                string ImagePath = FilePath + "\\image.png";
-                if(System.IO.File.Exists(ImagePath))
-                {
-                    System.IO.File.Delete(ImagePath);
-                }
-
-                using(FileStream stream = System.IO.File.Create(ImagePath))
-                {
-                    await stream.CopyToAsync(stream);
-                }
-
-            }
-            return Ok();
-        }
-
-        [HttpGet("Remove-Image")]
-
-        public ActionResult RemoveImage (int productId)
-        {
-            string filePath = GetFilePath(productId.ToString());
-            string ImagePath = filePath + "\\image.png";
-
-            if (System.IO.File.Exists(ImagePath))
-            {
-                System.IO.File.Delete(filePath);
-            }
-            return Ok();
-        }
-
-        [NonAction]
-        private string GetFilePath(string productId)
-        {
-            return _webHostEnvironment.WebRootPath + "\\Uploads\\Product\\" + productId;
-        }
-
-        [NonAction]
-
-        private string GetImageById(int productId)
-        {
-            string ImageUrl = string.Empty;
-            string HostUrl = "http://localhost:5237/";
-            string filePath = GetFilePath(productId.ToString());
-            string ImagePath = filePath + "\\image.png";
-
-            if(!System.IO.File.Exists(ImagePath))
-            {
-                ImageUrl = HostUrl + "Uploads/common/noimage.png";
-            }
-            else
-            {
-                ImageUrl = HostUrl + "Uploads/Product/" + productId + "/image.png";
-            }
-            return ImageUrl;
-        }
 
 
     }

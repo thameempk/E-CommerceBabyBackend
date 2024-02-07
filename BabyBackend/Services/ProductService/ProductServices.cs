@@ -9,11 +9,13 @@ namespace BabyBackend.Services.ProductService
     public class ProductServices : IProductServices
     {
         private readonly BabyDbContext _dbContext;
+        private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
-        public ProductServices(BabyDbContext dbContext, IMapper mapper)
+        public ProductServices(BabyDbContext dbContext, IMapper mapper, IWebHostEnvironment webHostEnvironment)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _webHostEnvironment = webHostEnvironment;
         }
 
         public async Task<List<ProductViewDto>> GetProducts()
@@ -79,19 +81,90 @@ namespace BabyBackend.Services.ProductService
 
         }
 
-        public async Task AddProduct(ProductDto productDto)
+        public async Task AddProduct(ProductDto productDto, IFormFile image)
         {
-            var prd = _mapper.Map<Product>(productDto);
-             _dbContext.products.AddAsync(prd);
-             await _dbContext.SaveChangesAsync();
+            try
+            {
+                string productImage = null;
+
+                if (image != null && image.Length > 0)
+                {
+                    string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                    string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "Uploads", "Product", fileName);
+
+                    using (var stream = new FileStream(filePath, FileMode.Create))
+                    {
+                        await image.CopyToAsync(stream);
+                    }
+
+
+                    productImage = "/Uploads/Product/" + fileName;
+                }
+                else
+                {
+                    productImage = "/Uploads/common/noimage.png";
+                }
+
+
+                var prd = _mapper.Map<Product>(productDto);
+
+                prd.ProductImage = productImage;
+
+
+
+                _dbContext.products.AddAsync(prd);
+                await _dbContext.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+
+                throw new Exception("Error adding product: " + ex.Message, ex);
+            }
         }
-        public async Task UpdateProduct(int id, ProductDto productDto)
+        public async Task UpdateProduct(int id, ProductDto productDto, IFormFile image)
         {
-            var product = _dbContext.products.FirstOrDefault(p => p.Id == id);
-            product.ProductName = productDto.ProductName;
-            product.ProductDescription = productDto.ProductDescription;
-            product.Price = productDto.Price;
-            await _dbContext.SaveChangesAsync();
+            try
+            {
+                var product = _dbContext.products.FirstOrDefault(p => p.Id == id);
+
+                if (product != null)
+                {
+                    product.ProductName = productDto.ProductName;
+                    product.ProductDescription = productDto.ProductDescription;
+                    product.Price = productDto.Price;
+
+                    
+                    if (image != null && image.Length > 0)
+                    {
+                        
+                        string fileName = Guid.NewGuid().ToString() + Path.GetExtension(image.FileName);
+                        string filePath = Path.Combine(_webHostEnvironment.WebRootPath, "Uploads", "Product", fileName);
+
+                        using (var stream = new FileStream(filePath, FileMode.Create))
+                        {
+                            await image.CopyToAsync(stream);
+                        }
+
+                       
+                        product.ProductImage = "/Uploads/Product/" + fileName;
+                    }else
+                    {
+                        product.ProductImage = "/Uploads/common/noimage.png";
+                    }
+
+                   
+                    await _dbContext.SaveChangesAsync();
+                }
+                else
+                {
+                    throw new InvalidOperationException($"Product with ID {id} not found.");
+                }
+            }
+            catch (Exception ex)
+            {
+                
+                throw new Exception($"Error updating product with ID {id}: {ex.Message}", ex);
+            }
         }
         public async Task DeleteProduct(int id)
         {
@@ -122,6 +195,8 @@ namespace BabyBackend.Services.ProductService
         }
 
 
+
+        
 
     }
 }

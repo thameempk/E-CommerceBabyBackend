@@ -9,8 +9,8 @@ namespace BabyBackend.Services.ProductService
         Task<ProductViewDto> GetProductById(int id);
         Task<List<ProductViewDto>> GetProductByCategory(int categoryId);
         Task<List<ProductViewDto>> ProductPagination(int pageNumber = 1, int pageSize = 10);
-         Task AddProduct(ProductDto productDto);
-        Task UpdateProduct(int id, ProductDto productDto);
+         Task AddProduct(ProductDto productDto, IFormFile image);
+        Task UpdateProduct(int id, ProductDto productDto, IFormFile image);
         Task DeleteProduct(int id);
 
 
