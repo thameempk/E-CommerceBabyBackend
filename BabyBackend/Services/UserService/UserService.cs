@@ -64,5 +64,28 @@ namespace BabyBackend.Services.UserService
             var existingUser = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == login.Email);
             return existingUser;
         }
+
+        public async Task<bool> BlockUser(int userId)
+        {
+            var user = await _dbContext.Users.FirstOrDefaultAsync( u=>u.Id ==  userId);
+            if(user == null)
+            {
+                return false;
+            }
+            user.isBlocked = true;
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
+        public async Task<bool> UnblockUser(int userId)
+        {
+            var user = await _dbContext.Users.FindAsync(userId);
+            if(user == null )
+            {
+                return false;
+            }
+            user.isBlocked = false;
+            await _dbContext.SaveChangesAsync();
+            return true;
+        }
     }
 }

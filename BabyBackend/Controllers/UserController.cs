@@ -1,6 +1,7 @@
 ﻿using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using BabyBackend.Services.UserService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -24,7 +25,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> GetUsers()
         {
             try
@@ -39,7 +40,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpGet("{id}")]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> GetUserById(int id)
         {
             try
@@ -53,7 +54,6 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPost("register")]
-
         public async Task<ActionResult> RegisterUser([FromBody] UserRegisterDto userRegister)
         {
             try
@@ -72,7 +72,6 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPost("login")]
-
         public async Task<ActionResult> Login([FromBody] LoginDto login)
         {
             try
@@ -83,6 +82,12 @@ namespace BabyBackend.Controllers
                 {
                     return NotFound("user name or password incorrect");
                 }
+
+                if (existingUser.isBlocked)
+                {
+                    return BadRequest("access denined");
+                }
+
                 bool validatePassword = BCrypt.Net.BCrypt.Verify(login.Password, existingUser.Password);
                 if (!validatePassword)
                 {
@@ -90,7 +95,7 @@ namespace BabyBackend.Controllers
                 }
                 string token = GenerateToken(existingUser);
 
-                return Ok(new { Token = token });
+                return Ok(new { Token = token, userId = existingUser.Id, name = existingUser.Name });
             }catch(Exception e)
             {
                 return StatusCode(500, e.Message);
@@ -125,6 +130,54 @@ namespace BabyBackend.Controllers
 
         }
 
+
+        [HttpPut("block-user")]
+
+        public async Task<ActionResult> BlockUser(int userId)
+        {
+            try
+            {
+                if(userId <= 0)
+                {
+                    return NotFound();
+                }
+
+                var status = await _userServices.BlockUser(userId);
+                if ( !status)
+                {
+                    return NotFound("user not found");
+                }
+                return Ok();
+            }catch(Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+
+        [HttpPut("unblock-user")]
+
+        public async Task<ActionResult> UnBlockUser(int userId)
+        {
+            try
+            {
+                if (userId <= 0)
+                {
+                    return BadRequest();
+                }
+
+                var status = await _userServices.UnblockUser(userId);
+                if( !status)
+                {
+                    return BadRequest("user not found");
+                }
+                return Ok();
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
 
     }
 }

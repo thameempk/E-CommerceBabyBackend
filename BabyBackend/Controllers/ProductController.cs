@@ -2,6 +2,7 @@
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using BabyBackend.Services.ProductService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using static System.Net.WebRequestMethods;
@@ -23,7 +24,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpGet]
-
+        [Authorize]
         public async Task<ActionResult> GetProducts()
         {
             try
@@ -43,7 +44,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpGet("paginated-product")]
-
+        [Authorize]
         public async Task<ActionResult> PaginatedProduct([FromQuery] int pageNumber = 1 , [FromQuery] int PageSize = 10)
         {
             try
@@ -59,7 +60,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpGet("{id}", Name ="getproducts")]
-
+        [Authorize]
         public async Task<ActionResult> GetProdectById(int id)
         {
             try
@@ -75,7 +76,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpGet("product-by-category")]
-
+        [Authorize]
         public async Task<ActionResult> GetProductByCategory(int categoryId)
         {
             try
@@ -89,7 +90,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPost]
-
+        [Authorize(Roles ="admin")]
         public async Task<IActionResult> AddProduct([FromForm] ProductDto productDto , IFormFile image)
         {
             try
@@ -104,7 +105,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpDelete("{id}")]
-
+        [Authorize(Roles ="admin")]
         public async Task<IActionResult> DeleteProduct(int id)
         {
             try
@@ -119,7 +120,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPut("{id}")]
-
+        [Authorize(Roles ="admin")]
         public async Task<IActionResult> UpdateProduct(int id, [FromForm] ProductDto productDto, IFormFile image)
         {
             try

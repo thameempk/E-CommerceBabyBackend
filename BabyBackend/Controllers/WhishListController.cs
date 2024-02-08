@@ -1,4 +1,5 @@
 ﻿using BabyBackend.Services.WhishListService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("get-whishlist")]
-
+        [Authorize]
         public async Task<ActionResult> GetWhishLists(int userId)
         {
             try
@@ -30,12 +31,16 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPost("add-whishlist")]
-
+        [Authorize]
         public async Task<ActionResult> AddWhishList(int  userId, int productId)
         {
             try
             {
-                await _whishLis.AddToWhishList(userId, productId);
+               var isExist = await _whishLis.AddToWhishList(userId, productId);
+                if(!isExist)
+                {
+                    return BadRequest("item already in the whishList");
+                }
                 return Ok();
             }catch(Exception ex)
             {
@@ -45,12 +50,12 @@ namespace BabyBackend.Controllers
         }
 
         [HttpDelete("remove-whishlist")]
-
-        public async Task<ActionResult> DeleteWhishList(int wId)
+        [Authorize]
+        public async Task<ActionResult> DeleteWhishList(int productId)
         {
             try
             {
-                await _whishLis.RemoveWhishList(wId);
+                await _whishLis.RemoveWhishList(productId);
                 return Ok();
             }catch(Exception e)
             {

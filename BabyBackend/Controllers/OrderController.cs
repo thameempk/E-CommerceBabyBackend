@@ -1,6 +1,7 @@
 ﻿using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using BabyBackend.Services.OrderService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -20,7 +21,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpPost("order-create")]
-
+        [Authorize]
         public async Task<ActionResult> createOrder(long price)
         {
             try
@@ -41,14 +42,14 @@ namespace BabyBackend.Controllers
 
 
         [HttpPost("payment")]
-
+        [Authorize]
         public  ActionResult Payment(RazorpayDto razorpay)
         {
             try
             {
                 if(razorpay == null)
                 {
-                    return BadRequest("razorpay must not null here");
+                    return BadRequest("razorpay details must not null here");
                 }
                 var con = _orderServices.Payment(razorpay);
                 return Ok(con);
@@ -61,7 +62,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpPost("place-Order")]
-
+        [Authorize]
         public async Task<ActionResult> PlaceOrder(int userId, OrderRequestDto orderRequests)
         {
             try
@@ -83,7 +84,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpGet("get_order_details")]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> GetOrderDetails (int userId)
         {
             try
@@ -104,7 +105,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("total_revenue")]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> GetTotalRevenue()
         {
             try
@@ -119,7 +120,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("get-order-details-admin")]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> GetOrderDetailsAdmin()
         {
             try
@@ -134,7 +135,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("get-detailed-order")]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> GetDetailedOrder(int orderId)
         {
             try
@@ -145,6 +146,22 @@ namespace BabyBackend.Controllers
                 return StatusCode(500, ex.Message);
             }
            
+        }
+
+        [HttpPut("update-order-status")]
+        [Authorize(Roles ="admin")]
+        public async Task<ActionResult> UpdateOrder(int orderId,[FromBody] OrderAdminViewDto orderAdminView)
+        {
+            try
+            {
+                var status = await _orderServices.UpdateOrder(orderId, orderAdminView);
+                return Ok();
+
+            }
+            catch(Exception ex) 
+            {
+                return StatusCode(500, ex.Message);
+            }
         }
     }
 }

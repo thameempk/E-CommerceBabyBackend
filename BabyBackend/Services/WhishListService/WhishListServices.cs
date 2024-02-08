@@ -22,21 +22,28 @@ namespace BabyBackend.Services.WhishListService
             _mapper = mapper;
         }
 
-        public async Task AddToWhishList(int userId, int productId)
+        public async Task<bool> AddToWhishList(int userId, int productId)
         {
-            WhishListDto whishListDto = new WhishListDto
+            var wExist = _dbContext.whishLists.Include(w=>w.products).FirstOrDefault(w => w.ProductId == productId);
+            if(wExist == null)
             {
-                userId = userId,
-                ProductId = productId
-            };
-            var wMapper = _mapper.Map<WhishList>(whishListDto);
-            _dbContext.whishLists.Add(wMapper);
-            await _dbContext.SaveChangesAsync();
+                WhishListDto whishListDto = new WhishListDto
+                {
+                    userId = userId,
+                    ProductId = productId
+                };
+                var wMapper = _mapper.Map<WhishList>(whishListDto);
+                _dbContext.whishLists.Add(wMapper);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            return false;
+            
         }
 
-        public async Task RemoveWhishList(int whishListId)
+        public async Task RemoveWhishList(int productId)
         {
-            var wList = await _dbContext.whishLists.FindAsync(whishListId);
+            var wList = await _dbContext.whishLists.FirstOrDefaultAsync(p=>p.ProductId==productId);
             if (wList != null)
             {
                 _dbContext.whishLists.Remove(wList);
@@ -55,7 +62,7 @@ namespace BabyBackend.Services.WhishListService
             {
                 var wView = wList.Select(w => new WhishListViewDto
                 {
-                    Id = w.Id,
+                    Id = w.products.Id,
                     ProductName = w.products?.ProductName,
                     ProductDescription = w.products?.ProductDescription,
                     Price = w.products.Price,

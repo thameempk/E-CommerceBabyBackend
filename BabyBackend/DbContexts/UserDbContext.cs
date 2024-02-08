@@ -91,6 +91,10 @@ namespace BabyBackend.DbContexts
                 .WithMany()
                 .HasForeignKey(oi => oi.ProductId);
 
+            modelBuilder.Entity<Users>()
+                .Property(u => u.isBlocked)
+                .HasDefaultValue(false);
+
             base.OnModelCreating(modelBuilder);
         }
 

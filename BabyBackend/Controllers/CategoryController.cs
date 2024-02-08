@@ -1,5 +1,6 @@
 ﻿using BabyBackend.Models.Dto;
 using BabyBackend.Services.CategoryService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System.ComponentModel;
@@ -18,6 +19,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet]
+        [Authorize]
         public async Task<ActionResult> GetCategories()
         {
             try
@@ -31,7 +33,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("{id}")]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> GetCategoryById(int id)
         {
             try
@@ -45,7 +47,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPost]
-
+        [Authorize(Roles ="admin")]
         public async Task<IActionResult> AddCategory([FromBody] CategoryDto categoryDto)
         {
             try
@@ -60,7 +62,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPut("{id}")]
-
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> UpdateCategory(int id , [FromBody] CategoryDto categoryDto)
         {
             try
@@ -75,7 +77,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpDelete("{id}")]
-
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteCategory(int id)
         {
             try

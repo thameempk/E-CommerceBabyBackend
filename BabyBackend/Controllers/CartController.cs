@@ -1,4 +1,5 @@
 ﻿using BabyBackend.Services.CartService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -16,7 +17,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("{userId}")]
-
+        [Authorize]
         public async Task<ActionResult> GetCartItems(int userId)
         {
             try
@@ -30,6 +31,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPost("add-to-cart")]
+        [Authorize]
         public async Task<ActionResult> AddToCart(int userId, int productId )
         {
             try
@@ -44,6 +46,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPut("add-quantity")]
+        [Authorize]
         public async Task<IActionResult> QuantityAdd(int userId, int productId)
         {
             try
@@ -58,7 +61,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpPut("min-quantity")]
-
+        [Authorize]
         public async Task<IActionResult> QuantityMin(int userId, int productId)
         {
             try
@@ -73,7 +76,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpDelete("remove-cart-item")]
-
+        [Authorize]
         public async Task<ActionResult> RemoveCartItem(int userId, int productId)
         {
             try

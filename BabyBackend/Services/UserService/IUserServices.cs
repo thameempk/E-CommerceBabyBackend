@@ -9,6 +9,8 @@ namespace BabyBackend.Services.UserService
         Task<List<UserViewDto>> GetUsers();
         Task<UserViewDto> GetUserById(int id);
         Task<Users> Login(LoginDto login);
+        Task<bool> BlockUser(int userId);
+        Task<bool> UnblockUser(int userId);
 
 
     }
