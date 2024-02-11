@@ -5,10 +5,10 @@ namespace BabyBackend.Services.CartService
 {
     public interface ICartServices
     {
-        Task<List<CartViewDto>> GetCartItems(int userId);
-        Task AddToCart(int userId, int productId);
-        Task DeleteCart(int userId, int productId);
-        Task QuantityPlus(int userId, int productId);
-        Task QuantityMin(int userId, int productId);
+        Task<List<CartViewDto>> GetCartItems(string token);
+        Task AddToCart(string token, int productId);
+        Task DeleteCart(string token, int productId);
+        Task QuantityPlus(string token, int productId);
+        Task QuantityMin(string token, int productId);
     }
 }

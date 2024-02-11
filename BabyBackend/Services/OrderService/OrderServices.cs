@@ -1,4 +1,5 @@
 ﻿using BabyBackend.DbContexts;
+using BabyBackend.JwtVerification;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using Microsoft.EntityFrameworkCore;
@@ -14,11 +15,15 @@ namespace BabyBackend.Services.OrderService
     {
         private readonly IConfiguration _configuration;
         private readonly BabyDbContext _dbContext;
+        private readonly string HostUrl;
+        private readonly IJwtServices _jwtServices;
 
-        public OrderServices(IConfiguration configuration, BabyDbContext dbContext)
+        public OrderServices(IConfiguration configuration, BabyDbContext dbContext, IJwtServices jwtServices)
         {
             _configuration = configuration;
             _dbContext = dbContext;
+            HostUrl = _configuration["HostUrl:url"];
+            _jwtServices = jwtServices;
         }
 
         public async Task<string> OrderCreate(long price)
@@ -62,10 +67,17 @@ namespace BabyBackend.Services.OrderService
             return orderList;
         }
 
-        public async Task<bool> CreateOrder(int userId, OrderRequestDto orderRequests)
+        public async Task<bool> CreateOrder(string token, OrderRequestDto orderRequests)
         {
             try
             {
+                int userId = _jwtServices.GetUserIdFromToken(token);
+
+                if (userId == null)
+                {
+                    throw new Exception("user id not valid");
+                }
+
                 if (orderRequests.TransactionId == null && orderRequests.OrderString == null)
                 {
                     return false;
@@ -100,8 +112,14 @@ namespace BabyBackend.Services.OrderService
             }
         }
 
-        public async Task<List<OrderViewDto>> GetOrderDtails(int userId)
+        public async Task<List<OrderViewDto>> GetOrderDtails(string token)
         {
+            int userId = _jwtServices.GetUserIdFromToken(token);
+
+            if (userId == null)
+            {
+                throw new Exception("user id not valid");
+            }
             var order = await _dbContext.orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(p => p.Product)
@@ -113,7 +131,7 @@ namespace BabyBackend.Services.OrderService
                 {
                     Id = o.Id,
                     OrderDate = o.Order.OrderDate,
-                    ProductName = o.Product.ProductName,
+                    ProductName = HostUrl + o.Product.ProductName,
                     ProductImage = o.Product.ProductImage,
                     Quantity = o.Quantity,
                     TotalPrice = o.TotalPrice,
@@ -174,7 +192,7 @@ namespace BabyBackend.Services.OrderService
                     orderProducts = orders.OrderItems.Select(oi => new CartViewDto
                     {
                         ProductId = oi.ProductId,
-                        ProductName = oi.Product.ProductName,
+                        ProductName = HostUrl + oi.Product.ProductName,
                         Price = oi.Product.Price,
                         Quantity = oi.Quantity,
                         TotalAmount = oi.TotalPrice,

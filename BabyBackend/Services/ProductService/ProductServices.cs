@@ -12,12 +12,14 @@ namespace BabyBackend.Services.ProductService
         private readonly IConfiguration _configuration;
         private readonly IWebHostEnvironment _webHostEnvironment;
         private readonly IMapper _mapper;
+        private readonly string HostUrl;
         public ProductServices(BabyDbContext dbContext, IMapper mapper, IWebHostEnvironment webHostEnvironment, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _webHostEnvironment = webHostEnvironment;
             _configuration = configuration;
+            HostUrl = _configuration["HostUrl:url"];
         }
 
         public async Task<List<ProductViewDto>> GetProducts()
@@ -33,7 +35,7 @@ namespace BabyBackend.Services.ProductService
                     ProductDescription = p.ProductDescription,
                     Price = p.Price,
                     Category = p.Category.Name,
-                    ProductImage = p.ProductImage
+                    ProductImage = HostUrl + p.ProductImage
                 }).ToList();
                 return productWithCategory;
             }
@@ -49,7 +51,7 @@ namespace BabyBackend.Services.ProductService
 
             var products = await _dbContext.products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == id);
 
-            if (products == null)
+            if (products != null)
             {
                 ProductViewDto product = new ProductViewDto
                 {
@@ -58,7 +60,7 @@ namespace BabyBackend.Services.ProductService
                     ProductDescription = products.ProductDescription,
                     Price = products.Price,
                     Category = products.Category.Name,
-                    ProductImage = products.ProductImage
+                    ProductImage = HostUrl + products.ProductImage
 
                 };
                 return product;
@@ -98,7 +100,7 @@ namespace BabyBackend.Services.ProductService
             try
             {
                 string productImage = null;
-                string HostUrl = null;
+            
 
                 if (image != null && image.Length > 0)
                 {
@@ -109,13 +111,12 @@ namespace BabyBackend.Services.ProductService
                     {
                         await image.CopyToAsync(stream);
                     }
-
-                    HostUrl = _configuration["HostUrl:url"];
-                    productImage = HostUrl + "/Uploads/Product/" + fileName;
+            
+                    productImage = "/Uploads/Product/" + fileName;
                 }
                 else
                 {
-                    productImage = HostUrl + "/Uploads/common/noimage.png";
+                    productImage =  "/Uploads/common/noimage.png";
                 }
 
 
@@ -158,12 +159,11 @@ namespace BabyBackend.Services.ProductService
                             await image.CopyToAsync(stream);
                         }
 
-
-                        product.ProductImage = "/Uploads/Product/" + fileName;
+                        product.ProductImage =  "/Uploads/Product/" + fileName;
                     }
                     else
                     {
-                        product.ProductImage = "/Uploads/common/noimage.png";
+                        product.ProductImage =  "/Uploads/common/noimage.png";
                     }
 
 

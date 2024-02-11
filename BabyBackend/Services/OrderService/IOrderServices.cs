@@ -8,9 +8,9 @@ namespace BabyBackend.Services.OrderService
         Task<string> OrderCreate(long price);
         public List<OrderDetailsDto> Payment(RazorpayDto razorpay);
 
-        Task<bool> CreateOrder(int userId, OrderRequestDto orderRequests);
+        Task<bool> CreateOrder(string token, OrderRequestDto orderRequests);
 
-        Task<List<OrderViewDto>> GetOrderDtails(int userId);
+        Task<List<OrderViewDto>> GetOrderDtails(string token);
 
         Task<decimal> GetTotalRevenue();
 

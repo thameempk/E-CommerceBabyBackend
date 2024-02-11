@@ -63,15 +63,15 @@ namespace BabyBackend.Controllers
 
         [HttpPost("place-Order")]
         [Authorize]
-        public async Task<ActionResult> PlaceOrder(int userId, OrderRequestDto orderRequests)
+        public async Task<ActionResult> PlaceOrder(string token, OrderRequestDto orderRequests)
         {
             try
             {
-                if(orderRequests == null || userId == null)
+                if(orderRequests == null || token == null)
                 {
                     return BadRequest();
                 }
-                await _orderServices.CreateOrder(userId, orderRequests);
+                await _orderServices.CreateOrder(token, orderRequests);
                 return Ok();
             }
             catch( Exception e )
@@ -85,15 +85,15 @@ namespace BabyBackend.Controllers
 
         [HttpGet("get_order_details")]
         [Authorize(Roles ="admin")]
-        public async Task<ActionResult> GetOrderDetails (int userId)
+        public async Task<ActionResult> GetOrderDetails (string token)
         {
             try
             {
-                if(userId <= 0)
+                if(token == null)
                 {
                     return BadRequest();
                 }
-                return Ok(await _orderServices.GetOrderDtails(userId));
+                return Ok(await _orderServices.GetOrderDtails(token));
              
             }
             catch (Exception e)

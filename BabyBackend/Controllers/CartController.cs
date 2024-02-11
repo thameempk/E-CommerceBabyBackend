@@ -18,11 +18,11 @@ namespace BabyBackend.Controllers
 
         [HttpGet("{userId}")]
         [Authorize]
-        public async Task<ActionResult> GetCartItems(int userId)
+        public async Task<ActionResult> GetCartItems( string token)
         {
             try
             {
-                return Ok(await _cartServices.GetCartItems(userId));
+                return Ok(await _cartServices.GetCartItems(token));
             }catch(Exception ex)
             {
                 return StatusCode(500,ex.Message);
@@ -32,11 +32,11 @@ namespace BabyBackend.Controllers
 
         [HttpPost("add-to-cart")]
         [Authorize]
-        public async Task<ActionResult> AddToCart(int userId, int productId )
+        public async Task<ActionResult> AddToCart([FromBody] string token, int productId )
         {
             try
             {
-                await _cartServices.AddToCart(userId, productId);
+                await _cartServices.AddToCart( token, productId);
                 return Ok();
             }catch( Exception ex )
             {
@@ -47,11 +47,11 @@ namespace BabyBackend.Controllers
 
         [HttpPut("add-quantity")]
         [Authorize]
-        public async Task<IActionResult> QuantityAdd(int userId, int productId)
+        public async Task<IActionResult> QuantityAdd([FromBody] string token, int productId)
         {
             try
             {
-                await _cartServices.QuantityPlus(userId, productId);
+                await _cartServices.QuantityPlus( token, productId);
                 return Ok();
             }catch(Exception e)
             {
@@ -62,11 +62,11 @@ namespace BabyBackend.Controllers
 
         [HttpPut("min-quantity")]
         [Authorize]
-        public async Task<IActionResult> QuantityMin(int userId, int productId)
+        public async Task<IActionResult> QuantityMin([FromBody]string token, int productId)
         {
             try
             {
-                await _cartServices.QuantityMin(userId, productId);
+                await _cartServices.QuantityMin( token, productId);
                 return Ok();
             }catch(Exception e)
             {
@@ -77,11 +77,11 @@ namespace BabyBackend.Controllers
 
         [HttpDelete("remove-cart-item")]
         [Authorize]
-        public async Task<ActionResult> RemoveCartItem(int userId, int productId)
+        public async Task<ActionResult> RemoveCartItem([FromBody] string token, int productId)
         {
             try
             {
-                await _cartServices.DeleteCart(userId, productId);
+                await _cartServices.DeleteCart( token, productId);
                 return Ok(true);
             }catch(Exception e)
             {

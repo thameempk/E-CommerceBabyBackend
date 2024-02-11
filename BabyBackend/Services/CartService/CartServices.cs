@@ -1,4 +1,5 @@
 ﻿using BabyBackend.DbContexts;
+using BabyBackend.JwtVerification;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using Microsoft.EntityFrameworkCore;
@@ -11,40 +12,66 @@ namespace BabyBackend.Services.CartService
     public class CartServices : ICartServices
     {
         private readonly BabyDbContext _dbContext;
+        private readonly string HostUrl;
+        private readonly IConfiguration _configuration;
+        private readonly IJwtServices _jwtServices;
 
-        public CartServices(BabyDbContext dbContext)
+        public CartServices(BabyDbContext dbContext, IConfiguration configuration, IJwtServices jwtServices)
         {
             _dbContext = dbContext;
+            _configuration = configuration;
+            HostUrl = _configuration["HostUrl:url"];
+            _jwtServices = jwtServices;
         }
 
-        public async Task<List<CartViewDto>> GetCartItems(int userId)
+        public async Task<List<CartViewDto>> GetCartItems(string token)
         {
-            var user = await _dbContext.Users
-                .Include(u => u.cart)
-                .ThenInclude(c => c.cartItems)
-                .ThenInclude(ci => ci.product)
-                .FirstOrDefaultAsync(u => u.Id == userId);
-
-            if (user != null)
+            try
             {
-                var cartItems = user.cart.cartItems.Select(ci => new CartViewDto
+                int userId = _jwtServices.GetUserIdFromToken(token);
+
+                if (userId == null)
                 {
-                    ProductId = ci.ProductId,
-                    ProductName = ci.product.ProductName,
-                    Quantity = ci.Quantity,
-                    Price = ci.product.Price,
-                    TotalAmount = ci.product.Price * ci.Quantity,
-                    ProductImage = ci.product.ProductImage,
-                }).ToList();
+                    throw new Exception("user id not valid");
+                }
 
-                return cartItems;
+                var user = await _dbContext.cart
+                    .Include(u => u.cartItems)
+                    .ThenInclude(ci => ci.product)
+                    .FirstOrDefaultAsync(u => u.UserId == userId);
+
+                if (user != null)
+                {
+                    var cartItems = user.cartItems.Select(ci => new CartViewDto
+                    {
+                        ProductId = ci.ProductId,
+                        ProductName = ci.product.ProductName,
+                        Quantity = ci.Quantity,
+                        Price = ci.product.Price,
+                        TotalAmount = ci.product.Price * ci.Quantity,
+                        ProductImage = HostUrl + ci.product.ProductImage,
+                    }).ToList();
+
+                    return cartItems;
+                }
+                return new List<CartViewDto>();
             }
+            catch(Exception e)
+            {
+                throw new Exception(e.Message);
+            }
+            
 
-            return new List<CartViewDto>();
+          
         }
 
-        public async Task AddToCart(int userId, int productId)
+        public async Task AddToCart(string token, int productId)
         {
+            int userId = _jwtServices.GetUserIdFromToken(token);
+            if (userId == null)
+            {
+                throw new Exception("user id not valid");
+            }
             var user = await _dbContext.Users
                 .Include(u => u.cart)
                 .ThenInclude(u => u.cartItems)
@@ -87,8 +114,13 @@ namespace BabyBackend.Services.CartService
             }
         }
 
-        public async Task DeleteCart(int userId, int productId)
+        public async Task DeleteCart(string token, int productId)
         {
+            int userId = _jwtServices.GetUserIdFromToken(token);
+            if (userId == null)
+            {
+                throw new Exception("user id not valid");
+            }
             var user = await _dbContext.Users
                 .Include(u => u.cart)
                 .ThenInclude(u => u.cartItems)
@@ -107,8 +139,13 @@ namespace BabyBackend.Services.CartService
             }
         }
 
-        public async Task QuantityPlus(int userId, int productId)
+        public async Task QuantityPlus(string token, int productId)
         {
+            int userId = _jwtServices.GetUserIdFromToken(token);
+            if (userId == null)
+            {
+                throw new Exception("user id not valid");
+            }
             var user = await _dbContext.Users
                 .Include(u => u.cart)
                 .ThenInclude(u => u.cartItems)
@@ -127,8 +164,13 @@ namespace BabyBackend.Services.CartService
             }
         }
 
-        public async Task QuantityMin(int userId, int productId)
+        public async Task QuantityMin(string token, int productId)
         {
+            int userId = _jwtServices.GetUserIdFromToken(token);
+            if (userId == null)
+            {
+                throw new Exception("user id not valid");
+            }
             var user = await _dbContext.Users
                 .Include(u => u.cart)
                 .ThenInclude(u => u.cartItems)

@@ -15,11 +15,17 @@ namespace BabyBackend.Services.WhishListService
     {
         private readonly BabyDbContext _dbContext;
         private readonly IMapper _mapper;
+        private readonly IConfiguration _configuration;
+        private readonly string HostUrl;
 
-        public WhishListServices(BabyDbContext dbContext, IMapper mapper)
+
+        public WhishListServices(BabyDbContext dbContext, IMapper mapper, IConfiguration configuration)
         {
             _dbContext = dbContext;
             _mapper = mapper;
+            _configuration = configuration;
+            HostUrl = _configuration["HostUrl:url"];
+
         }
 
         public async Task<bool> AddToWhishList(int userId, int productId)
@@ -67,7 +73,7 @@ namespace BabyBackend.Services.WhishListService
                     ProductDescription = w.products?.ProductDescription,
                     Price = w.products.Price,
                     Category = w.products?.Category.Name,
-                    ProductImage = w.products.ProductImage
+                    ProductImage = HostUrl + w.products.ProductImage
 
                 }).ToList();
 

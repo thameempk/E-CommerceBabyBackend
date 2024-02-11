@@ -1,4 +1,5 @@
-﻿using BabyBackend.Models;
+﻿using BabyBackend.JwtVerification;
+using BabyBackend.Models;
 using BabyBackend.Models.Dto;
 using BabyBackend.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
@@ -17,11 +18,13 @@ namespace BabyBackend.Controllers
 
         private readonly IConfiguration _configuration;
         private readonly IUserServices _userServices;
+        
 
         public UserController(IConfiguration configuration, IUserServices userServices)
         {
             _configuration = configuration;
             _userServices = userServices;
+           
         }
 
         [HttpGet]
@@ -178,6 +181,10 @@ namespace BabyBackend.Controllers
                 return BadRequest(e.Message);
             }
         }
+
+
+
+        
 
     }
 }

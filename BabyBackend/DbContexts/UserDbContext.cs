@@ -94,6 +94,9 @@ namespace BabyBackend.DbContexts
             modelBuilder.Entity<Users>()
                 .Property(u => u.isBlocked)
                 .HasDefaultValue(false);
+            modelBuilder.Entity<OrderMain>()
+                .Property(o => o.OrderStatus)
+                .HasDefaultValue("processing");
 
             base.OnModelCreating(modelBuilder);
         }
