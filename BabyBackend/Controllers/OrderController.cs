@@ -13,6 +13,7 @@ namespace BabyBackend.Controllers
     public class OrderController : ControllerBase
     {
         private readonly IOrderServices _orderServices;
+       
 
         public OrderController(IOrderServices orderServices)
         {
@@ -63,15 +64,18 @@ namespace BabyBackend.Controllers
 
         [HttpPost("place-Order")]
         [Authorize]
-        public async Task<ActionResult> PlaceOrder(string token, OrderRequestDto orderRequests)
+        public async Task<ActionResult> PlaceOrder( OrderRequestDto orderRequests)
         {
             try
             {
-                if(orderRequests == null || token == null)
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                if (orderRequests == null || jwtToken == null)
                 {
                     return BadRequest();
                 }
-                await _orderServices.CreateOrder(token, orderRequests);
+                await _orderServices.CreateOrder(jwtToken, orderRequests);
                 return Ok();
             }
             catch( Exception e )
@@ -85,15 +89,18 @@ namespace BabyBackend.Controllers
 
         [HttpGet("get_order_details")]
         [Authorize(Roles ="admin")]
-        public async Task<ActionResult> GetOrderDetails (string token)
+        public async Task<ActionResult> GetOrderDetails ()
         {
             try
             {
-                if(token == null)
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                if (jwtToken == null)
                 {
                     return BadRequest();
                 }
-                return Ok(await _orderServices.GetOrderDtails(token));
+                return Ok(await _orderServices.GetOrderDtails(jwtToken));
              
             }
             catch (Exception e)

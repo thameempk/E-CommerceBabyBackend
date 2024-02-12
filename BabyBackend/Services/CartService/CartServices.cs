@@ -183,7 +183,12 @@ namespace BabyBackend.Services.CartService
                 var item = user.cart.cartItems.FirstOrDefault(ci => ci.ProductId == productId);
                 if (item != null)
                 {
-                    item.Quantity = item.Quantity - 1;
+                     item.Quantity = item.Quantity >= 1 ? item.Quantity - 1 : item.Quantity;
+                    if(item.Quantity == 0)
+                    {
+                        _dbContext.cartItems.Remove(item);
+                        await _dbContext.SaveChangesAsync();
+                    }
                     await _dbContext.SaveChangesAsync();
                 }
             }

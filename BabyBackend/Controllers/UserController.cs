@@ -135,7 +135,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpPut("block-user")]
-
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult> BlockUser(int userId)
         {
             try
@@ -159,7 +159,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpPut("unblock-user")]
-
+        [Authorize(Roles ="admin")]
         public async Task<ActionResult> UnBlockUser(int userId)
         {
             try

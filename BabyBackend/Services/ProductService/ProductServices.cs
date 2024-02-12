@@ -84,7 +84,7 @@ namespace BabyBackend.Services.ProductService
                 ProductDescription = p.ProductDescription,
                 Price = p.Price,
                 Category = p.Category.Name,
-                ProductImage = p.ProductImage
+                ProductImage = HostUrl + p.ProductImage
             }).ToListAsync();
             if (products != null)
             {

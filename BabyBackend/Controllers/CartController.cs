@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace BabyBackend.Controllers
 {
@@ -14,15 +15,21 @@ namespace BabyBackend.Controllers
         public CartController(ICartServices cartServices)
         {
             _cartServices = cartServices;
+           
         }
 
-        [HttpGet("{userId}")]
+        [HttpGet("get-cart-items")]
         [Authorize]
-        public async Task<ActionResult> GetCartItems( string token)
+        public async Task<ActionResult> GetCartItems()
         {
             try
             {
-                return Ok(await _cartServices.GetCartItems(token));
+
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1]; 
+
+                return Ok(await _cartServices.GetCartItems(jwtToken));
             }catch(Exception ex)
             {
                 return StatusCode(500,ex.Message);
@@ -32,12 +39,15 @@ namespace BabyBackend.Controllers
 
         [HttpPost("add-to-cart")]
         [Authorize]
-        public async Task<ActionResult> AddToCart([FromBody] string token, int productId )
+        public async Task<ActionResult> AddToCart( int productId )
         {
             try
             {
-                await _cartServices.AddToCart( token, productId);
-                return Ok();
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                await _cartServices.AddToCart(jwtToken, productId);
+                return Ok("product successfully added to the cart");
             }catch( Exception ex )
             {
                 return StatusCode(500,ex.Message);
@@ -47,11 +57,15 @@ namespace BabyBackend.Controllers
 
         [HttpPut("add-quantity")]
         [Authorize]
-        public async Task<IActionResult> QuantityAdd([FromBody] string token, int productId)
+        public async Task<IActionResult> QuantityAdd( int productId)
         {
             try
             {
-                await _cartServices.QuantityPlus( token, productId);
+                
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                await _cartServices.QuantityPlus(jwtToken, productId);
                 return Ok();
             }catch(Exception e)
             {
@@ -62,11 +76,14 @@ namespace BabyBackend.Controllers
 
         [HttpPut("min-quantity")]
         [Authorize]
-        public async Task<IActionResult> QuantityMin([FromBody]string token, int productId)
+        public async Task<IActionResult> QuantityMin( int productId)
         {
             try
             {
-                await _cartServices.QuantityMin( token, productId);
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                await _cartServices.QuantityMin(jwtToken, productId);
                 return Ok();
             }catch(Exception e)
             {
@@ -77,11 +94,14 @@ namespace BabyBackend.Controllers
 
         [HttpDelete("remove-cart-item")]
         [Authorize]
-        public async Task<ActionResult> RemoveCartItem([FromBody] string token, int productId)
+        public async Task<ActionResult> RemoveCartItem( int productId)
         {
             try
             {
-                await _cartServices.DeleteCart( token, productId);
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                await _cartServices.DeleteCart(jwtToken, productId);
                 return Ok(true);
             }catch(Exception e)
             {
