@@ -11,6 +11,7 @@ namespace BabyBackend.Models
         public int ProductId { get; set; }
         [Required]
         public decimal TotalPrice {  get; set; }
+       
         [Required]
         public int Quantity { get; set; }
 

@@ -20,9 +20,9 @@ namespace BabyBackend.Models
         [Required]
         public string HomeAddress { get; set; }
         [Required]
-        public string OrderStatus { get; set; }
-        [Required]
         public string OrderString { get; set; }
+        [Required]
+        public string OrderStatus { get; set; }
         [Required]
         public string TransactionId { get; set; }
 

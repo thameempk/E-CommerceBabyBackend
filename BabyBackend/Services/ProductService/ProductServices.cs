@@ -74,10 +74,10 @@ namespace BabyBackend.Services.ProductService
 
         }
 
-        public async Task<List<ProductViewDto>> GetProductByCategory(int categoryId)
+        public async Task<List<ProductViewDto>> GetProductByCategory(string  categoryName)
         {
 
-            var products = await _dbContext.products.Include(p => p.Category).Where(p => p.CategoryId == categoryId).Select(p => new ProductViewDto
+            var products = await _dbContext.products.Include(p => p.Category).Where(p => p.Category.Name == categoryName).Select(p => new ProductViewDto
             {
                 Id = p.Id,
                 ProductName = p.ProductName,
@@ -126,7 +126,7 @@ namespace BabyBackend.Services.ProductService
 
 
 
-                _dbContext.products.AddAsync(prd);
+                await _dbContext.products.AddAsync(prd);
                 await _dbContext.SaveChangesAsync();
             }
             catch (Exception ex)
@@ -146,6 +146,7 @@ namespace BabyBackend.Services.ProductService
                     product.ProductName = productDto.ProductName;
                     product.ProductDescription = productDto.ProductDescription;
                     product.Price = productDto.Price;
+                    product.CategoryId = productDto.categoryId;
 
 
                     if (image != null && image.Length > 0)
@@ -163,7 +164,7 @@ namespace BabyBackend.Services.ProductService
                     }
                     else
                     {
-                        product.ProductImage =  "/Uploads/common/noimage.png";
+                        product.ProductImage =  product.ProductImage;
                     }
 
 
@@ -201,11 +202,30 @@ namespace BabyBackend.Services.ProductService
                 ProductName = p.ProductName,
                 ProductDescription = p.ProductDescription,
                 Price = p.Price,
-                ProductImage = p.ProductImage,
+                ProductImage = HostUrl + p.ProductImage,
                 Category = p.Category.Name
             }).ToList();
 
             return paginatedProducts;
+        }
+
+
+        public async Task<List<ProductViewDto>> paginatedByCategory(int categoryId, int pageNumber = 1, int pageSize = 10)
+        {
+            var products = await _dbContext.products.Include(p => p.Category).Skip((pageNumber - 1) * pageSize).Take(pageSize).Where(p => p.CategoryId == categoryId).Select(p => new ProductViewDto
+            {
+                Id = p.Id,
+                ProductName = p.ProductName,
+                ProductDescription = p.ProductDescription,
+                Price = p.Price,
+                Category = p.Category.Name,
+                ProductImage = HostUrl + p.ProductImage
+            }).ToListAsync();
+            if (products != null)
+            {
+                return products;
+            }
+            return new List<ProductViewDto>();
         }
 
 

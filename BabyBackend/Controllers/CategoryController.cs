@@ -19,7 +19,6 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet]
-        [Authorize]
         public async Task<ActionResult> GetCategories()
         {
             try

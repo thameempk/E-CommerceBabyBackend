@@ -18,6 +18,8 @@ namespace BabyBackend.Models
 
         public virtual Category Category { get; set; }
 
+        public virtual List<WhishList> WhishLists { get; set; }
+
         public virtual List<CartItem> CartItems { get; set; }
 
     }

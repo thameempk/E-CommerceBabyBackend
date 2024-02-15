@@ -46,25 +46,25 @@ namespace BabyBackend.Services.OrderService
             return OrderId;
         }
 
-        public List<OrderDetailsDto> Payment(RazorpayDto razorpay)
+        public bool Payment(RazorpayDto razorpay)
         {
+            if (razorpay == null ||
+        razorpay.razorpay_payment_id == null ||
+        razorpay.razorpay_order_id == null ||
+        razorpay.razorpay_signature == null)
+            {
+                return false;
+            }
+            RazorpayClient client = new RazorpayClient(_configuration["Razorpay:KeyId"], _configuration["Razorpay:KeySecret"]);
             Dictionary<string, string> attributes = new Dictionary<string, string>();
-            attributes.Add("raz_pay_id", razorpay.raz_pay_id);
-            attributes.Add("raz_ord_id", razorpay.raz_ord_id);
-            attributes.Add("raz_pay_sig", razorpay.raz_pay_sig);
+            attributes.Add("razorpay_payment_id", razorpay.razorpay_payment_id);
+            attributes.Add("razorpay_order_id", razorpay.razorpay_order_id);
+            attributes.Add("razorpay_signature", razorpay.razorpay_signature);
 
             Utils.verifyPaymentSignature(attributes);
-            List<OrderDetailsDto> orderList = new List<OrderDetailsDto>
-            {
-                new OrderDetailsDto
-                {
-                    TransactionId = razorpay.raz_pay_id,
-                    OrderId = razorpay.raz_ord_id
-                }
-            };
 
 
-            return orderList;
+            return true;
         }
 
         public async Task<bool> CreateOrder(string token, OrderRequestDto orderRequests)
@@ -91,7 +91,6 @@ namespace BabyBackend.Services.OrderService
                     CustomerName = orderRequests.CustomerName,
                     CustomerPhone = orderRequests.CustomerPhone,
                     HomeAddress = orderRequests.HomeAddress,
-                    OrderStatus = orderRequests.OrderStatus,
                     OrderString = orderRequests.OrderString,
                     TransactionId = orderRequests.TransactionId,
                     OrderItems = orderRequests.CartViews.Select(cv => new OrderItem
@@ -131,8 +130,39 @@ namespace BabyBackend.Services.OrderService
                 {
                     Id = o.Id,
                     OrderDate = o.Order.OrderDate,
-                    ProductName = HostUrl + o.Product.ProductName,
-                    ProductImage = o.Product.ProductImage,
+                    ProductName =  o.Product.ProductName,
+                    ProductImage = HostUrl + o.Product.ProductImage,
+                    Quantity = o.Quantity,
+                    TotalPrice = o.TotalPrice,
+                    OrderId = order.OrderString,
+                    OrderStatus = order.OrderStatus
+                }).ToList();
+
+                return orderDetails;
+            }
+
+            return new List<OrderViewDto>();
+        }
+
+        public async Task<List<OrderViewDto>> adminUserOrder(int userId)
+        {
+            if (userId == null)
+            {
+                throw new Exception("user id not valid");
+            }
+            var order = await _dbContext.orders
+                .Include(o => o.OrderItems)
+                .ThenInclude(p => p.Product)
+                .FirstOrDefaultAsync(o => o.userId == userId);
+
+            if (order != null)
+            {
+                var orderDetails = order.OrderItems.Select(o => new OrderViewDto
+                {
+                    Id = o.Id,
+                    OrderDate = o.Order.OrderDate,
+                    ProductName = o.Product.ProductName,
+                    ProductImage = HostUrl + o.Product.ProductImage,
                     Quantity = o.Quantity,
                     TotalPrice = o.TotalPrice,
                     OrderId = order.OrderString,
@@ -192,11 +222,11 @@ namespace BabyBackend.Services.OrderService
                     orderProducts = orders.OrderItems.Select(oi => new CartViewDto
                     {
                         ProductId = oi.ProductId,
-                        ProductName = HostUrl + oi.Product.ProductName,
+                        ProductName =  oi.Product.ProductName,
                         Price = oi.Product.Price,
                         Quantity = oi.Quantity,
                         TotalAmount = oi.TotalPrice,
-                        ProductImage = oi.Product.ProductImage
+                        ProductImage = HostUrl + oi.Product.ProductImage
                         
                     }).ToList()
                 };
@@ -220,7 +250,7 @@ namespace BabyBackend.Services.OrderService
             return 0;
         }
 
-        public async Task<bool> UpdateOrder(int orderId, OrderAdminViewDto orderAdminView)
+        public async Task<bool> UpdateOrder(int orderId, UpdateOrderDto orderAdminView)
         {
             var order = await _dbContext.orders.FindAsync(orderId);
             if (order != null)
@@ -231,5 +261,44 @@ namespace BabyBackend.Services.OrderService
             }
             return false;
         }
+
+        public async Task<int> GetTotalOrders()
+        {
+            var order = await _dbContext.orders.Include(o => o.OrderItems).ToListAsync();
+
+            if (order != null)
+            {
+                var orderdet = order.SelectMany(o => o.OrderItems);
+                var totalIncome = orderdet.Sum(od => od.Quantity);
+                return totalIncome;
+            }
+
+            return 0;
+        }
+
+        public async Task<int> TodayOrders()
+        {
+            DateTime todayStart = DateTime.Today;
+            DateTime todayEnd = todayStart.AddDays(1).AddTicks(-1);
+            int todayOrders = await _dbContext.orders.CountAsync(c => c.OrderDate >= todayStart && c.OrderDate <= todayEnd);
+            return todayOrders;
+       
+        }
+
+        public async Task<decimal> TodayRevenue()
+        {
+            DateTime todayStart = DateTime.Today;
+            DateTime todayEnd = todayStart.AddDays(1).AddTicks(-1);
+            var order = await _dbContext.orders.Include(o => o.OrderItems).Where(o=>o.OrderDate >= todayStart && o.OrderDate <= todayEnd).ToListAsync();
+
+            if (order != null)
+            {
+                var orderdet = order.SelectMany(o => o.OrderItems);
+                decimal totalIncome = orderdet.Sum(od => od.TotalPrice);
+                return totalIncome;
+            }
+            return 0;
+        }
+
     }
 }

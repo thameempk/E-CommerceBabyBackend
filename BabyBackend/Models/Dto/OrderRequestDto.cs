@@ -8,7 +8,6 @@
         public string CustomerCity {  get; set; }
         public string HomeAddress {  get; set; }
         public string OrderString {  get; set; }
-        public string OrderStatus {  get; set; }
         public string TransactionId {  get; set; }
 
         public List<CartViewDto> CartViews { get; set; }

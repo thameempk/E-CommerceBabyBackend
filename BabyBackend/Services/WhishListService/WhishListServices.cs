@@ -43,7 +43,9 @@ namespace BabyBackend.Services.WhishListService
                 await _dbContext.SaveChangesAsync();
                 return true;
             }
-            return false;
+            _dbContext.whishLists.Remove(wExist);
+            await _dbContext.SaveChangesAsync();
+            return true;
             
         }
 

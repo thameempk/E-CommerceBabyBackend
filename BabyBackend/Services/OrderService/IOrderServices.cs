@@ -6,7 +6,7 @@ namespace BabyBackend.Services.OrderService
     public interface IOrderServices
     {
         Task<string> OrderCreate(long price);
-        public List<OrderDetailsDto> Payment(RazorpayDto razorpay);
+        public bool Payment(RazorpayDto razorpay);
 
         Task<bool> CreateOrder(string token, OrderRequestDto orderRequests);
 
@@ -18,14 +18,21 @@ namespace BabyBackend.Services.OrderService
 
         Task<OrderAdminDetailViewDto> GetOrderDetailsById(int orderId);
 
-        Task<bool> UpdateOrder(int orderId, OrderAdminViewDto orderAdminView);
+        Task<bool> UpdateOrder(int orderId, UpdateOrderDto updateOrder);
+        Task<List<OrderViewDto>> adminUserOrder(int userId);
+
+        Task<int> GetTotalOrders();
+        Task<int> TodayOrders();
+
+        Task<decimal> TodayRevenue();
 
 
-        
-        
 
 
-        
+
+
+
+
 
     }
 }

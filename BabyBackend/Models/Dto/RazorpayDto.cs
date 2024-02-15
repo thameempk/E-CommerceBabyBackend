@@ -2,10 +2,10 @@
 {
     public class RazorpayDto
     {
-        public string raz_pay_id { get; set; }
+        public string razorpay_payment_id { get; set; }
 
-        public string raz_ord_id {  get; set; }
+        public string razorpay_order_id {  get; set; }
 
-        public string raz_pay_sig {  get; set; }
+        public string razorpay_signature {  get; set; }
     }
 }

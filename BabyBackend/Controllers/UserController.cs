@@ -108,6 +108,34 @@ namespace BabyBackend.Controllers
 
         }
 
+        [HttpPost("admin-login")]
+
+        public async Task<ActionResult> adminLogin(LoginDto login)
+        {
+            try
+            {
+                var existingUser = await _userServices.Login(login);
+
+                if (existingUser == null)
+                {
+                    return NotFound("user name or password incorrect");
+                }
+
+                bool validatePassword = BCrypt.Net.BCrypt.Verify(login.Password, existingUser.Password);
+                if (!validatePassword)
+                {
+                    return BadRequest("password doesn't match");
+                }
+                string token = GenerateToken(existingUser);
+
+                return Ok(new { Token = token, userId = existingUser.Id, name = existingUser.Name });
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+
 
         private string GenerateToken(Users users)
         {

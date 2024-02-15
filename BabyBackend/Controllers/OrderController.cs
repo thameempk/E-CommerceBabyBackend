@@ -75,8 +75,8 @@ namespace BabyBackend.Controllers
                 {
                     return BadRequest();
                 }
-                await _orderServices.CreateOrder(jwtToken, orderRequests);
-                return Ok();
+                var status = await _orderServices.CreateOrder(jwtToken, orderRequests);
+                return Ok(status);
             }
             catch( Exception e )
             {
@@ -88,7 +88,7 @@ namespace BabyBackend.Controllers
 
 
         [HttpGet("get_order_details")]
-        [Authorize(Roles ="admin")]
+        [Authorize]
         public async Task<ActionResult> GetOrderDetails ()
         {
             try
@@ -157,17 +157,84 @@ namespace BabyBackend.Controllers
 
         [HttpPut("update-order-status")]
         [Authorize(Roles ="admin")]
-        public async Task<ActionResult> UpdateOrder(int orderId,[FromBody] OrderAdminViewDto orderAdminView)
+        public async Task<ActionResult> UpdateOrder(int orderId,[FromBody] UpdateOrderDto updateOrder)
         {
             try
             {
-                var status = await _orderServices.UpdateOrder(orderId, orderAdminView);
+                var status = await _orderServices.UpdateOrder(orderId, updateOrder);
                 return Ok();
 
             }
             catch(Exception ex) 
             {
                 return StatusCode(500, ex.Message);
+            }
+        }
+
+
+        [HttpGet("adminUserOrder")]
+        [Authorize(Roles = "admin")]
+
+        public async Task<ActionResult> SingleUserOrder(int userId)
+        {
+            try
+            {
+                if(userId == null)
+                {
+                    return BadRequest("user is null");
+                }
+
+                var userOrder = await _orderServices.adminUserOrder(userId);
+                return Ok(userOrder);
+            }
+            catch(Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+
+        [HttpGet("total-orders")]
+        [Authorize(Roles = "admin")]
+
+        public async Task<ActionResult> GetTotalOrders()
+        {
+            try
+            {
+                return Ok(await _orderServices.GetTotalOrders());
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+
+        [HttpGet("today-orders")]
+        //[Authorize(Roles = "admin")]
+
+        public async Task<ActionResult> TodayOrders()
+        {
+            try
+            {
+                return Ok(await _orderServices.TodayOrders());
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+
+        [HttpGet("today-revenue")]
+        //[Authorize(Roles = "admin")]
+
+        public async Task<ActionResult> TodayRevenue()
+        {
+            try
+            {
+                return Ok(await _orderServices.TodayRevenue());
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
             }
         }
     }

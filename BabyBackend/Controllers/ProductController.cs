@@ -74,14 +74,28 @@ namespace BabyBackend.Controllers
             
         }
 
+        [HttpGet("paginated-by-category")]
 
-        [HttpGet("product-by-category")]
-
-        public async Task<ActionResult> GetProductByCategory(int categoryId)
+        public async Task<ActionResult> paginatedByCategory(int categoryId, int pageNumber = 1, int pageSize = 10)
         {
             try
             {
-                return Ok(await _productServices.GetProductByCategory(categoryId));
+                return Ok(await _productServices.paginatedByCategory(categoryId,pageNumber, pageSize));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+
+
+        [HttpGet("product-by-category")]
+
+        public async Task<ActionResult> GetProductByCategory(string categoryName)
+        {
+            try
+            {
+                return Ok(await _productServices.GetProductByCategory(categoryName));
             }catch(Exception e)
             {
                 return StatusCode(500,e.Message);
