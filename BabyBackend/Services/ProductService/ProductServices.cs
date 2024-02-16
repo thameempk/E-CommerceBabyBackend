@@ -228,6 +228,23 @@ namespace BabyBackend.Services.ProductService
             return new List<ProductViewDto>();
         }
 
+        public async Task<List<ProductViewDto>> SearchProduct(string searchTerm)
+        {
+            var product = await _dbContext.products.Where(p => p.ProductName.Contains(searchTerm)).ToListAsync();
+            if(product != null){
+                return product.Select(p => new ProductViewDto
+                {
+                    Id = p.Id,
+                    ProductName = p.ProductName,
+                    ProductDescription = p.ProductDescription,
+                    Price = p.Price,
+                    ProductImage = HostUrl + p.ProductImage
+                }).ToList();
+            }
+            return new List<ProductViewDto>{ };
+            
+        }
+
 
 
 

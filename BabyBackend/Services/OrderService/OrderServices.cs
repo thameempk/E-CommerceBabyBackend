@@ -82,6 +82,7 @@ namespace BabyBackend.Services.OrderService
                 {
                     return false;
                 }
+                var cart = await _dbContext.cart.Include(c => c.cartItems).FirstOrDefaultAsync(c=>c.UserId == userId);
                 var order = new OrderMain
                 {
                     userId = userId,
@@ -102,6 +103,7 @@ namespace BabyBackend.Services.OrderService
                 };
 
                 _dbContext.orders.Add(order);
+                _dbContext.cart.Remove(cart);
                 await _dbContext.SaveChangesAsync();
                 return true;
             }
@@ -119,29 +121,36 @@ namespace BabyBackend.Services.OrderService
             {
                 throw new Exception("user id not valid");
             }
-            var order = await _dbContext.orders
+
+            var orders = await _dbContext.orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(p => p.Product)
-                .FirstOrDefaultAsync(o => o.userId == userId);
+                .Where(o => o.userId == userId)
+                .ToListAsync();
 
-            if (order != null)
+            var orderDetails = new List<OrderViewDto>();
+
+            foreach (var order in orders)
             {
-                var orderDetails = order.OrderItems.Select(o => new OrderViewDto
+                foreach (var orderItem in order.OrderItems)
                 {
-                    Id = o.Id,
-                    OrderDate = o.Order.OrderDate,
-                    ProductName =  o.Product.ProductName,
-                    ProductImage = HostUrl + o.Product.ProductImage,
-                    Quantity = o.Quantity,
-                    TotalPrice = o.TotalPrice,
-                    OrderId = order.OrderString,
-                    OrderStatus = order.OrderStatus
-                }).ToList();
+                    var orderDetail = new OrderViewDto
+                    {
+                        Id = orderItem.Id,
+                        OrderDate = order.OrderDate,
+                        ProductName = orderItem.Product.ProductName,
+                        ProductImage = HostUrl + orderItem.Product.ProductImage,
+                        Quantity = orderItem.Quantity,
+                        TotalPrice = orderItem.TotalPrice,
+                        OrderId = order.OrderString,
+                        OrderStatus = order.OrderStatus
+                    };
 
-                return orderDetails;
+                    orderDetails.Add(orderDetail);
+                }
             }
 
-            return new List<OrderViewDto>();
+            return orderDetails;
         }
 
         public async Task<List<OrderViewDto>> adminUserOrder(int userId)
@@ -150,29 +159,35 @@ namespace BabyBackend.Services.OrderService
             {
                 throw new Exception("user id not valid");
             }
-            var order = await _dbContext.orders
+            var orders = await _dbContext.orders
                 .Include(o => o.OrderItems)
                 .ThenInclude(p => p.Product)
-                .FirstOrDefaultAsync(o => o.userId == userId);
+                .Where(o => o.userId == userId)
+                .ToListAsync();
 
-            if (order != null)
+            var orderDetails = new List<OrderViewDto>();
+
+            foreach (var order in orders)
             {
-                var orderDetails = order.OrderItems.Select(o => new OrderViewDto
+                foreach (var orderItem in order.OrderItems)
                 {
-                    Id = o.Id,
-                    OrderDate = o.Order.OrderDate,
-                    ProductName = o.Product.ProductName,
-                    ProductImage = HostUrl + o.Product.ProductImage,
-                    Quantity = o.Quantity,
-                    TotalPrice = o.TotalPrice,
-                    OrderId = order.OrderString,
-                    OrderStatus = order.OrderStatus
-                }).ToList();
+                    var orderDetail = new OrderViewDto
+                    {
+                        Id = orderItem.Id,
+                        OrderDate = order.OrderDate,
+                        ProductName = orderItem.Product.ProductName,
+                        ProductImage = HostUrl + orderItem.Product.ProductImage,
+                        Quantity = orderItem.Quantity,
+                        TotalPrice = orderItem.TotalPrice,
+                        OrderId = order.OrderString,
+                        OrderStatus = order.OrderStatus
+                    };
 
-                return orderDetails;
+                    orderDetails.Add(orderDetail);
+                }
             }
 
-            return new List<OrderViewDto>();
+            return orderDetails;
         }
 
         public async Task<List<OrderAdminViewDto>> GetOrderDetailAdmin()
@@ -280,9 +295,16 @@ namespace BabyBackend.Services.OrderService
         {
             DateTime todayStart = DateTime.Today;
             DateTime todayEnd = todayStart.AddDays(1).AddTicks(-1);
-            int todayOrders = await _dbContext.orders.CountAsync(c => c.OrderDate >= todayStart && c.OrderDate <= todayEnd);
-            return todayOrders;
-       
+            var order = await _dbContext.orders.Include(o => o.OrderItems).Where(o => o.OrderDate >= todayStart && o.OrderDate <= todayEnd).ToListAsync();
+
+            if (order != null)
+            {
+                var orderdet = order.SelectMany(o => o.OrderItems);
+                int todayOrders = orderdet.Sum(od => od.Quantity);
+                return todayOrders;
+            }
+            return 0;
+
         }
 
         public async Task<decimal> TodayRevenue()

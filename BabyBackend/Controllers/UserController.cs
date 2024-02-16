@@ -98,7 +98,7 @@ namespace BabyBackend.Controllers
                 }
                 string token = GenerateToken(existingUser);
 
-                return Ok(new { Token = token, userId = existingUser.Id, name = existingUser.Name });
+                return Ok(new { Token = token, email = existingUser.Email, name = existingUser.Name });
             }catch(Exception e)
             {
                 return StatusCode(500, e.Message);

@@ -209,7 +209,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("today-orders")]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
 
         public async Task<ActionResult> TodayOrders()
         {
@@ -224,7 +224,7 @@ namespace BabyBackend.Controllers
         }
 
         [HttpGet("today-revenue")]
-        //[Authorize(Roles = "admin")]
+        [Authorize(Roles = "admin")]
 
         public async Task<ActionResult> TodayRevenue()
         {

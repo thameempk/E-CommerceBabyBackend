@@ -148,7 +148,23 @@ namespace BabyBackend.Controllers
             
         }
 
-       
+        [HttpGet("serach-product")]
+
+        public async Task<ActionResult> SearchProduct(string searchTerm)
+        {
+            try
+            {
+                return Ok(await _productServices.SearchProduct(searchTerm));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+
+        }
+
+
+
 
 
 

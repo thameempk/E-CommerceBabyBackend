@@ -14,6 +14,8 @@ namespace BabyBackend.Services.ProductService
         Task UpdateProduct(int id, ProductDto productDto, IFormFile image);
         Task DeleteProduct(int id);
 
+        Task<List<ProductViewDto>> SearchProduct(string searchTerm);
+
 
 
     }
