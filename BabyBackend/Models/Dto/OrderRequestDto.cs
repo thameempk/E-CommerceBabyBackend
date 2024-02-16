@@ -10,7 +10,6 @@
         public string OrderString {  get; set; }
         public string TransactionId {  get; set; }
 
-        public List<CartViewDto> CartViews { get; set; }
 
     }
 }

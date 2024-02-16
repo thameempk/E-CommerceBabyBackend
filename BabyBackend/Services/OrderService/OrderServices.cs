@@ -82,7 +82,7 @@ namespace BabyBackend.Services.OrderService
                 {
                     return false;
                 }
-                var cart = await _dbContext.cart.Include(c => c.cartItems).FirstOrDefaultAsync(c=>c.UserId == userId);
+                var cart = await _dbContext.cart.Include(c => c.cartItems).ThenInclude(ci=>ci.product).FirstOrDefaultAsync(c=>c.UserId == userId);
                 var order = new OrderMain
                 {
                     userId = userId,
@@ -94,11 +94,11 @@ namespace BabyBackend.Services.OrderService
                     HomeAddress = orderRequests.HomeAddress,
                     OrderString = orderRequests.OrderString,
                     TransactionId = orderRequests.TransactionId,
-                    OrderItems = orderRequests.CartViews.Select(cv => new OrderItem
+                    OrderItems = cart.cartItems.Select(cv => new OrderItem
                     {
                         ProductId = cv.ProductId,
                         Quantity = cv.Quantity,
-                        TotalPrice = cv.Quantity * cv.Price
+                        TotalPrice = cv.Quantity * cv.product.Price
                     }).ToList()
                 };
 
