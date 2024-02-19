@@ -203,7 +203,7 @@ namespace BabyBackend.Services.ProductService
                 ProductDescription = p.ProductDescription,
                 Price = p.Price,
                 ProductImage = HostUrl + p.ProductImage,
-                Category = p.Category.Name
+                Category = p.Category.Name,
             }).ToList();
 
             return paginatedProducts;

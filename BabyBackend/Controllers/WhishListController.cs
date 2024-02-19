@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json.Linq;
 
 namespace BabyBackend.Controllers
 {
@@ -18,11 +19,14 @@ namespace BabyBackend.Controllers
 
         [HttpGet("get-whishlist")]
         [Authorize]
-        public async Task<ActionResult> GetWhishLists(int userId)
+        public async Task<ActionResult> GetWhishLists()
         {
             try
             {
-                return Ok(await _whishLis.GetWhishLists(userId));
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                return Ok(await _whishLis.GetWhishLists(jwtToken));
             }catch(Exception ex)
             {
                 return StatusCode(500, ex.Message); 
@@ -32,11 +36,14 @@ namespace BabyBackend.Controllers
 
         [HttpPost("add-whishlist")]
         [Authorize]
-        public async Task<ActionResult> AddWhishList(int  userId, int productId)
+        public async Task<ActionResult> AddWhishList( int productId)
         {
             try
             {
-               var isExist = await _whishLis.AddToWhishList(userId, productId);
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                var isExist = await _whishLis.AddToWhishList(jwtToken, productId);
                 if(!isExist)
                 {
                     return BadRequest("item already in the whishList");
@@ -55,13 +62,35 @@ namespace BabyBackend.Controllers
         {
             try
             {
-                await _whishLis.RemoveWhishList(productId);
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                await _whishLis.RemoveWhishList(jwtToken,productId);
                 return Ok();
             }catch(Exception e)
             {
                 return StatusCode(500, e.Message);
             }
            
+        }
+
+        [HttpPost("isWishListExist")]
+        [Authorize]
+        public async Task<ActionResult> isWishListExist(int productId)
+        {
+            try
+            {
+                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
+                var splitToken = token.Split(' ');
+                var jwtToken = splitToken[1];
+                var isexist = await _whishLis.isWishListExist(jwtToken, productId);
+                return Ok(isexist);
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+
         }
 
     }
