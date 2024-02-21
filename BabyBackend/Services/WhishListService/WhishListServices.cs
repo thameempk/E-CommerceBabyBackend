@@ -107,20 +107,6 @@ namespace BabyBackend.Services.WhishListService
             
         }
 
-        public async Task<bool> isWishListExist(string token, int productId)
-        {
-            int userId = _jwtServices.GetUserIdFromToken(token);
-            if (userId == null)
-            {
-                throw new Exception("user id not valid");
-            }
-            var wList = await _dbContext.whishLists.FirstOrDefaultAsync(p => p.UserId == userId && p.ProductId == productId);
-            if(wList == null)
-            {
-                return true;
-            }
-            return false;
-
-        }
+        
     }
 }

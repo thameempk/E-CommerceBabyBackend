@@ -162,10 +162,7 @@ namespace BabyBackend.Services.ProductService
 
                         product.ProductImage =  "/Uploads/Product/" + fileName;
                     }
-                    else
-                    {
-                        product.ProductImage =  product.ProductImage;
-                    }
+                  
 
 
                     await _dbContext.SaveChangesAsync();
@@ -243,6 +240,13 @@ namespace BabyBackend.Services.ProductService
             }
             return new List<ProductViewDto>{ };
             
+        }
+
+        public async Task<string> GetProductImage(int productId)
+        {
+            var products = await _dbContext.products.Include(p => p.Category).FirstOrDefaultAsync(p => p.Id == productId);
+            var productImage = products.ProductImage;
+            return productImage;
         }
 
 

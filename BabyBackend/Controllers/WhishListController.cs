@@ -74,24 +74,7 @@ namespace BabyBackend.Controllers
            
         }
 
-        [HttpPost("isWishListExist")]
-        [Authorize]
-        public async Task<ActionResult> isWishListExist(int productId)
-        {
-            try
-            {
-                var token = HttpContext.Request.Headers["Authorization"].FirstOrDefault();
-                var splitToken = token.Split(' ');
-                var jwtToken = splitToken[1];
-                var isexist = await _whishLis.isWishListExist(jwtToken, productId);
-                return Ok(isexist);
-            }
-            catch (Exception e)
-            {
-                return StatusCode(500, e.Message);
-            }
-
-        }
+        
 
     }
 }

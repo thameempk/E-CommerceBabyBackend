@@ -163,6 +163,20 @@ namespace BabyBackend.Controllers
 
         }
 
+        [HttpGet("get-product-image")]
+        [Authorize(Roles = "admin")]
+        public async Task<ActionResult> GetProductImage(int productId)
+        {
+            try
+            {
+                return Ok(await _productServices.GetProductImage(productId));
+            }
+            catch (Exception e)
+            {
+                return StatusCode(500, e.Message);
+            }
+        }
+
 
 
 
