@@ -40,7 +40,7 @@ namespace BabyBackend.Services.WhishListService
             {
                 throw new Exception("user id not valid");
             }
-            var wExist = _dbContext.whishLists.Include(w=>w.products).FirstOrDefault(w => w.ProductId == productId);
+            var wExist = _dbContext.whishLists.Include(w=>w.products).FirstOrDefault(w => w.ProductId == productId && w.UserId == userId);
             if(wExist == null)
             {
                 WhishListDto whishListDto = new WhishListDto

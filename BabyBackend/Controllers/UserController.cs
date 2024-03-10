@@ -1,6 +1,7 @@
 ﻿using BabyBackend.JwtVerification;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
+using BabyBackend.Services.EmailServices;
 using BabyBackend.Services.UserService;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -18,12 +19,14 @@ namespace BabyBackend.Controllers
 
         private readonly IConfiguration _configuration;
         private readonly IUserServices _userServices;
+        private readonly IEmailService _emailService;
         
 
-        public UserController(IConfiguration configuration, IUserServices userServices)
+        public UserController(IConfiguration configuration, IUserServices userServices,IEmailService emailService)
         {
             _configuration = configuration;
             _userServices = userServices;
+            _emailService = emailService;
            
         }
 
@@ -39,6 +42,20 @@ namespace BabyBackend.Controllers
                 return StatusCode(500,ex.Message);
             }
             
+        }
+
+        [HttpPost]
+        [Route("otpSend")]
+        public async Task<IActionResult> SendOtp(string email)
+        {
+            try
+            {
+                bool isOtpSend = await _emailService.sendOtp(email);
+                return Ok(isOtpSend);
+            }catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
 
@@ -62,11 +79,8 @@ namespace BabyBackend.Controllers
             try
             {
                 var isExist = await _userServices.RegisterUser(userRegister);
-                if (!isExist)
-                {
-                    return BadRequest("user already exist");
-                }
-                return Ok("succss");
+              
+                return Ok(isExist);
             }catch (Exception ex)
             {
                 return StatusCode(500, $"an error occured, {ex.Message}");

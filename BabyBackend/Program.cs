@@ -3,6 +3,7 @@ using BabyBackend.JwtVerification;
 using BabyBackend.Mapper;
 using BabyBackend.Services.CartService;
 using BabyBackend.Services.CategoryService;
+using BabyBackend.Services.EmailServices;
 using BabyBackend.Services.OrderService;
 using BabyBackend.Services.ProductService;
 using BabyBackend.Services.UserService;
@@ -28,6 +29,7 @@ builder.Services.AddScoped<ICartServices, CartServices>();
 builder.Services.AddScoped<IWhishListServices, WhishListServices>();
 builder.Services.AddScoped<IOrderServices, OrderServices>();
 builder.Services.AddScoped<IJwtServices, JwtServices>();
+builder.Services.AddScoped<IEmailService, EmailService>();
 
 builder.Services.AddAuthentication(options =>
 {

@@ -2,6 +2,9 @@
 using BabyBackend.DbContexts;
 using BabyBackend.Models;
 using BabyBackend.Models.Dto;
+using BabyBackend.Services.EmailServices;
+using Microsoft.AspNetCore.Http.HttpResults;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Collections.Generic;
@@ -18,12 +21,14 @@ namespace BabyBackend.Services.UserService
         private readonly IMapper _mapper;
         private readonly BabyDbContext _dbContext;
         private readonly IConfiguration _configuration;
+        private readonly IEmailService _emailService;
 
-        public UserService(BabyDbContext dbContext, IMapper mapper, IConfiguration configuration)
+        public UserService(BabyDbContext dbContext, IMapper mapper, IConfiguration configuration, IEmailService emailService)
         {
             _dbContext = dbContext;
             _mapper = mapper;
             _configuration = configuration;
+            _emailService = emailService;
         }
 
         public async Task<List<UserViewDto>> GetUsers()
@@ -40,23 +45,30 @@ namespace BabyBackend.Services.UserService
             return mapUser;
         }
 
-        public async Task<bool> RegisterUser(UserRegisterDto userRegister)
+       
+
+        public async Task<string> RegisterUser(UserRegisterDto userRegister)
         {
             var isUserExist = await _dbContext.Users.FirstOrDefaultAsync(u => u.Email == userRegister.Email);
             if (isUserExist != null)
             {
-                return false;
+                return "user already exist";
             }
+            bool verifyOtp =  _emailService.verifyOtp(userRegister.Email, userRegister.Otp);
+            if(verifyOtp)
+            {
+                string salt = BCrypt.Net.BCrypt.GenerateSalt();
+                string hashPassword = BCrypt.Net.BCrypt.HashPassword(userRegister.Password, salt);
+                userRegister.Password = hashPassword;
 
-            string salt = BCrypt.Net.BCrypt.GenerateSalt();
-            string hashPassword = BCrypt.Net.BCrypt.HashPassword(userRegister.Password, salt);
-            userRegister.Password = hashPassword;
+                var user = _mapper.Map<Users>(userRegister);
+                _dbContext.Users.Add(user);
+                await _dbContext.SaveChangesAsync();
 
-            var user = _mapper.Map<Users>(userRegister);
-            _dbContext.Users.Add(user);
-            await _dbContext.SaveChangesAsync();
-
-            return true;
+                return "register successfully";
+            }
+            return "wrong otp";
+            
         }
 
         public async Task<Users> Login(LoginDto login)
